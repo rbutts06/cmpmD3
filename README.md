@@ -1,6 +1,6 @@
 # D3 starter
 
-A walking skeleton: one thin slice of a game that works from end to end. The player moves gridwise over a big seeded world, with a game core that knows nothing about Phaser and a Phaser client that presents what the core reports. Assignment instructions are on Canvas.
+Target: The player is a farmer who grows rats out of the ground and uses them for cooking, potions, and generating money. Rats are put to work in a mill where they generate power and money for the player. The game ends when the player has so many rats (number TBD) they revolt against the player. 
 
 Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) and [Git](https://git-scm.com/downloads). Create your own repository from this template, clone it, open a terminal in that folder, and run `deno task setup` once. Run `deno task dev` and open the local URL printed in the terminal (normally `http://localhost:3000`). Arrow keys move. Add `?seed=7` to the URL for another world. Open the repository folder itself in VS Code, not a parent folder, and accept the recommended Deno extension. If Phaser still shows errors or `any` after `deno task setup`, type or save in that file once.
 
