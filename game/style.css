@@ -81,3 +81,60 @@ body {
     rgb(0 0 0 / 0.5) 100%
   );
 }
+
+.HUD {
+  display: grid;
+  grid-template-columns: repeat(4, 25%);
+  grid-template-rows: repeat(2, 50%);
+  justify-items: center;
+
+  width: 35vw;
+  height: 40vh;
+  padding: 1%;
+  padding-top: 1%;
+
+  background-color: hsl(37, 100%, 31%);
+
+  border-style: solid;
+  border-width: 1em;
+  border-radius: 10px;
+  border-color: hsl(37, 80%, 40%);
+}
+
+.inventorySlot {
+  --size: 10em;
+  width: var(--size);
+  height: var(--size);
+
+  justify-items: center;
+
+  background-color: hsl(37, 100%, 31%);
+
+  border-style: solid;
+  border-width: 1em;
+  border-radius: 10px;
+  border-color: hsl(37, 80%, 40%);
+}
+
+.itemIcon {
+  display: flex;
+
+  height: 60%;
+  width: auto;
+
+  margin-top: 5%;
+
+  border-style: solid;
+  border-radius: 5px;
+  border-color: blue;
+}
+
+.itemLabel {
+  display: flex;
+
+  justify-content: center;
+  margin-top: 0%;
+
+  font-size: large;
+  color: white;
+}

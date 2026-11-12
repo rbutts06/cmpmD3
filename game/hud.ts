@@ -33,3 +33,68 @@ export class Hud {
     element("terrain").textContent = terrainAt(this.seed, x, y);
   }
 }
+
+const INVENTORY_SLOT_AMOUNT = 8;
+
+function createInventory() {
+  const inv = element("inventory") as HTMLDivElement;
+  const template = element("inventorySlot-template") as HTMLTemplateElement;
+
+  for (let i = 0; i < INVENTORY_SLOT_AMOUNT; i++) {
+    const clone = template.content.cloneNode(true) as HTMLTemplateElement;
+    const newSlot = clone.querySelector(".inventorySlot") as HTMLDivElement;
+    newSlot.setAttribute("id", `slot-${i}`);
+    const icon = newSlot.querySelector(".itemIcon") as HTMLImageElement;
+    icon.setAttribute("src", "assets/egg.png");
+
+    inv.append(newSlot);
+  }
+}
+createInventory();
+
+// Temporary for coding stuff until we have an actual inventory system
+interface tempItem {
+  name: string;
+  icon: string;
+  amount: number;
+}
+
+interface slotData {
+  label: string;
+  icon: string;
+}
+
+function getSlotData(slotNum: number): slotData {
+  const inv = element("inventory");
+  const slot = inv.querySelector(`.slot-${slotNum}`)!;
+  const label = slot.querySelector(".itemLabel")!;
+  const icon = slot.querySelector(".itemIcon")! as HTMLImageElement;
+
+  return ({ label: label.textContent, icon: icon.src });
+}
+
+// deno-lint-ignore no-unused-vars
+function replaceSlot(slotNum: number, item: tempItem) {
+  const inv = element("inventory");
+
+  const slot = inv.querySelector(`.slot-${slotNum}`)!;
+
+  const label = slot.querySelector("itemLabel")!;
+  label.textContent = `${item.name} (${item.amount})`;
+
+  const icon = inv.querySelector(".itemIcon")! as HTMLImageElement;
+  icon.setAttribute("src", item.icon);
+}
+
+// deno-lint-ignore no-unused-vars
+function findEmptySlot(): number {
+  for (let i = 0; i < INVENTORY_SLOT_AMOUNT; i++) {
+    const slot = getSlotData(i);
+
+    if (slot.label.toLowerCase() == "empty") {
+      return i;
+    }
+  }
+
+  return (-1);
+}
