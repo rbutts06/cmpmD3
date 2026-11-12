@@ -3,14 +3,13 @@
 import Phaser from "phaser";
 import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
 import { terrainAt } from "../../core/mod.ts";
-
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 600;
 const WALK_MS = 120;
 const BUMP_MS = 60;
-const MARKER_COLOR = 0xf5e6a8;
-const BUMP_COLOR = 0xe0533d;
+//const MARKER_COLOR = 0xf5e6a8;
+//const BUMP_COLOR = 0xe0533d;
 
 const TERRAIN_COLORS: Record<Terrain, number> = {
   grass: 0x5d9e4a,
@@ -37,18 +36,21 @@ export class GridView extends Phaser.Scene {
   private readonly seed: number;
   private readonly start: Cell;
   private ground!: Phaser.GameObjects.Graphics;
-  private marker!: Phaser.GameObjects.Arc;
+  private marker!: Phaser.GameObjects.Image;
 
   constructor(state: GameState) {
     super("grid");
     this.seed = state.seed;
     this.start = { ...state.player };
   }
+  preload(): void {
+    this.load.image("player", "./assets/player.png");
+  }
 
   create() {
     this.ground = this.add.graphics();
     const { x, y } = cellCenter(this.start);
-    this.marker = this.add.circle(x, y, CELL_SIZE * 0.35, MARKER_COLOR);
+    this.marker = this.add.image(x, y, "player");
     this.cameras.main.startFollow(this.marker, true, 0.2, 0.2);
     this.drawCellsAround(this.start);
     this.fitToDisplay();
@@ -102,11 +104,19 @@ export class GridView extends Phaser.Scene {
     });
   }
 
+  /* private collect(at: Cell): Promise<void> {
+    return new Promise((done) => {
+      //add item to inventory
+      console.log("gathered");
+      //onComplete: (() => done());
+    });
+  }*/
+
   // Lurch part of the way toward the blocked cell, flash, and come back.
   private bump(at: Cell, toward: Cell): Promise<void> {
     const start = cellCenter(at);
     const target = cellCenter(toward);
-    this.marker.setFillStyle(BUMP_COLOR);
+    //this.marker.setFillStyle(BUMP_COLOR);
     return new Promise((done) => {
       this.tweens.add({
         targets: this.marker,
@@ -115,7 +125,7 @@ export class GridView extends Phaser.Scene {
         duration: BUMP_MS,
         yoyo: true,
         onComplete: () => {
-          this.marker.setFillStyle(MARKER_COLOR);
+          //this.marker.setFillStyle(MARKER_COLOR);
           done();
         },
       });
