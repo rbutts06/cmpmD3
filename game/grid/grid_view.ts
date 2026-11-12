@@ -2,22 +2,24 @@
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
 import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
-import { terrainAt } from "../../core/mod.ts";
+import { objectPos, terrainAt } from "../../core/mod.ts";
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 600;
 const WALK_MS = 120;
 const BUMP_MS = 60;
-//const MARKER_COLOR = 0xf5e6a8;
-//const BUMP_COLOR = 0xe0533d;
 
 const TERRAIN_COLORS: Record<Terrain, number> = {
   grass: 0x5d9e4a,
   forest: 0x2f6b3a,
-  water: 0x2d5f9e,
+  water: 0xfabf2a,
   rock: 0x6e6a66,
 };
 
+const object_assets: Record<string, string> = {
+  rat: "./assets/rat.png",
+  rodentia: "./assets/rodentia.png",
+};
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
 // the player without showing an unpainted edge.
 const CELLS_ACROSS = 16;
@@ -45,6 +47,7 @@ export class GridView extends Phaser.Scene {
   }
   preload(): void {
     this.load.image("player", "./assets/player.png");
+    this.load.image("rat", "./assets/rat.png");
   }
 
   create() {
@@ -75,6 +78,12 @@ export class GridView extends Phaser.Scene {
       () => this.fitToDisplay(),
       { once: true },
     );
+  }
+  private makeObject() {
+    for (const object of objectPos) {
+      //drawObject(this, object.x, object.y, object_assets[type]);
+      this.add.image(object.x, object.y, object_assets[object.object]);
+    }
   }
 
   show(event: GameEvent): Promise<void> {
@@ -124,10 +133,7 @@ export class GridView extends Phaser.Scene {
         y: start.y + (target.y - start.y) * 0.3,
         duration: BUMP_MS,
         yoyo: true,
-        onComplete: () => {
-          //this.marker.setFillStyle(MARKER_COLOR);
-          done();
-        },
+        onComplete: () => done(),
       });
     });
   }
