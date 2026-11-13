@@ -1,8 +1,20 @@
 // The only folder allowed to import Phaser, and for one job: drawing the grid.
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
-import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
-import { createObjectPositions, objectPos, terrainAt } from "../../core/mod.ts";
+import type {
+  Cell,
+  GameEvent,
+  GameState,
+  Gatherable,
+  Terrain,
+} from "../../core/mod.ts";
+import {
+  createObjectPositions,
+  destroy,
+  //inventoryAdd,
+  objectPos,
+  terrainAt,
+} from "../../core/mod.ts";
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 600;
@@ -96,7 +108,7 @@ export class GridView extends Phaser.Scene {
       case "blocked":
         return this.bump(event.at, event.toward);
       case "gathered":
-        return this.collect(event.at);
+        return this.collect(event.at, event.item);
       default:
         // A new event type fails to type-check here until it has a presentation.
         event satisfies never;
@@ -115,9 +127,10 @@ export class GridView extends Phaser.Scene {
     });
   }
 
-  private collect(at: Cell): Promise<void> {
+  private collect(at: Cell, item: Gatherable): Promise<void> {
     return new Promise((done) => {
-      //add item to inventory
+      //inventoryAdd(state, item); (need to turn into tempItem)
+      destroy(item, at);
       console.log("gathered at: ", at);
       done();
     });

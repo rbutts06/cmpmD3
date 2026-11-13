@@ -3,7 +3,7 @@ import { isPassable, noise, terrainAt } from "./mod.ts";
 export type Gatherable = "rat" | "rodentia";
 
 interface objectTable {
-  object: string;
+  object: Gatherable;
   x: number;
   y: number;
 }
@@ -35,4 +35,13 @@ export function cellCenter({ x, y }: Cell): Cell {
     x: x * 32 + 32 / 2,
     y: y * 32 + 32 / 2,
   };
+}
+
+export function destroy(item: Gatherable, cell: Cell) {
+  const index = objectPos.findIndex((object) =>
+    object.x === cell.x && object.y === cell.y && object.object === item
+  );
+  if (index !== -1) {
+    objectPos.splice(index, 1);
+  }
 }

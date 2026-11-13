@@ -17,7 +17,7 @@ function describe(event: GameEvent): string {
     case "blocked":
       return `blocked by ${event.terrain} at ${event.toward.x}, ${event.toward.y}`;
     case "gathered":
-      return `picked up ${event.at}`; //eventually change to "picked up {item}"
+      return `picked up ${event.item}`; //eventually change to "picked up {item}"
   }
 }
 
