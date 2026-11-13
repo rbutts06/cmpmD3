@@ -2,7 +2,7 @@
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
 import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
-import { objectPos, terrainAt } from "../../core/mod.ts";
+import { createObjectPositions, objectPos, terrainAt } from "../../core/mod.ts";
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 600;
@@ -25,7 +25,7 @@ const object_assets: Record<string, string> = {
 const CELLS_ACROSS = 16;
 const CELLS_DOWN = 13;
 
-function cellCenter({ x, y }: Cell): Cell {
+export function cellCenter({ x, y }: Cell): Cell {
   return {
     x: x * CELL_SIZE + CELL_SIZE / 2,
     y: y * CELL_SIZE + CELL_SIZE / 2,
@@ -82,6 +82,7 @@ export class GridView extends Phaser.Scene {
     );
   }
   private makeObject() {
+    createObjectPositions(this.seed);
     for (const object of objectPos) {
       this.add.image(object.x, object.y, object_assets[object.object]);
     }
