@@ -2,7 +2,7 @@
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
 import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
-import { objectPos, terrainAt } from "../../core/mod.ts";
+import { createObjectPositions, objectPos, terrainAt } from "../../core/mod.ts";
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 600;
@@ -17,7 +17,7 @@ const TERRAIN_COLORS: Record<Terrain, number> = {
 };
 
 const object_assets: Record<string, string> = {
-  rat: "./assets/rat.png",
+  rat: "rat",
   rodentia: "./assets/rodentia.png",
 };
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
@@ -25,7 +25,7 @@ const object_assets: Record<string, string> = {
 const CELLS_ACROSS = 16;
 const CELLS_DOWN = 13;
 
-function cellCenter({ x, y }: Cell): Cell {
+export function cellCenter({ x, y }: Cell): Cell {
   return {
     x: x * CELL_SIZE + CELL_SIZE / 2,
     y: y * CELL_SIZE + CELL_SIZE / 2,
@@ -48,6 +48,7 @@ export class GridView extends Phaser.Scene {
   preload(): void {
     this.load.image("player", "./assets/player.png");
     this.load.image("rat", "./assets/rat.png");
+    this.load.image("rodentia", "./assets/rodentia.png");
   }
 
   create() {
@@ -57,6 +58,7 @@ export class GridView extends Phaser.Scene {
     this.cameras.main.startFollow(this.marker, true, 0.2, 0.2);
     this.drawCellsAround(this.start);
     this.fitToDisplay();
+    this.makeObject();
   }
 
   // Phaser has no device-pixel setting of its own. So the canvas backing store is
@@ -80,8 +82,8 @@ export class GridView extends Phaser.Scene {
     );
   }
   private makeObject() {
+    createObjectPositions(this.seed);
     for (const object of objectPos) {
-      //drawObject(this, object.x, object.y, object_assets[type]);
       this.add.image(object.x, object.y, object_assets[object.object]);
     }
   }
@@ -94,7 +96,7 @@ export class GridView extends Phaser.Scene {
       case "blocked":
         return this.bump(event.at, event.toward);
       case "gathered":
-        return this.walk(event.at);
+        return this.collect(event.at);
       default:
         // A new event type fails to type-check here until it has a presentation.
         event satisfies never;
@@ -113,13 +115,13 @@ export class GridView extends Phaser.Scene {
     });
   }
 
-  /* private collect(at: Cell): Promise<void> {
+  private collect(at: Cell): Promise<void> {
     return new Promise((done) => {
       //add item to inventory
-      console.log("gathered");
-      //onComplete: (() => done());
+      console.log("gathered at: ", at);
+      done();
     });
-  }*/
+  }
 
   // Lurch part of the way toward the blocked cell, flash, and come back.
   private bump(at: Cell, toward: Cell): Promise<void> {

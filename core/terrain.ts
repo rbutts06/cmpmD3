@@ -19,7 +19,12 @@ export function isPassable(terrain: Terrain): boolean {
 
 // Value noise: random numbers at coarse grid points, blended between them, so
 // that terrain forms regions instead of static.
-function noise(seed: number, x: number, y: number, scale: number): number {
+export function noise(
+  seed: number,
+  x: number,
+  y: number,
+  scale: number,
+): number {
   const left = Math.floor(x / scale);
   const top = Math.floor(y / scale);
   const blendX = smooth(x / scale - left);
