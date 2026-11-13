@@ -2,6 +2,7 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
+import { objectPos } from "./mod.ts";
 import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
@@ -55,6 +56,11 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const terrain = terrainAt(state.seed, to.x, to.y);
   if (!isPassable(terrain)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
+  }
+  for (const pos of objectPos) {
+    if (state.player.x == pos.x && state.player.y == pos.y) {
+      return [{ type: "gathered", at: from }];
+    }
   }
   state.player.x = to.x;
   state.player.y = to.y;

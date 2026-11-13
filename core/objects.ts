@@ -8,8 +8,12 @@ interface objectTable {
 
 export const objectPos: objectTable[] = [{
   object: "rat",
-  x: 32,
-  y: 32,
+  x: 49,
+  y: 49,
+}, {
+  object: "rat",
+  x: 80,
+  y: 80,
 }];
 
 /*export function collide({ x, y }: position) {
