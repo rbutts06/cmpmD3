@@ -124,9 +124,10 @@ body {
 
   margin-top: 5%;
 
-  border-style: solid;
+  /* Debug border for image sizing */
+  /* border-style: solid;
   border-radius: 5px;
-  border-color: blue;
+  border-color: blue; */
 }
 
 .itemLabel {

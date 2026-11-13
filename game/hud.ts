@@ -1,4 +1,10 @@
-import { type GameEvent, type GameState, terrainAt } from "../core/mod.ts";
+import {
+  type GameEvent,
+  type GameState,
+  INVENTORY_SLOT_COUNT,
+  tempItem, //Remove later
+  terrainAt,
+} from "../core/mod.ts";
 
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
@@ -36,13 +42,16 @@ export class Hud {
   }
 }
 
-const INVENTORY_SLOT_AMOUNT = 8;
+/* to do:
+ * - Update createInventory to use game state instead of importing INVENTORY_SLOT_COUNT
+ * - See if I can add it to the hud class above
+ */
 
 function createInventory() {
   const inv = element("inventory") as HTMLDivElement;
   const template = element("inventorySlot-template") as HTMLTemplateElement;
 
-  for (let i = 0; i < INVENTORY_SLOT_AMOUNT; i++) {
+  for (let i = 0; i < INVENTORY_SLOT_COUNT; i++) {
     const clone = template.content.cloneNode(true) as HTMLTemplateElement;
     const newSlot = clone.querySelector(".inventorySlot") as HTMLDivElement;
     newSlot.setAttribute("id", `slot-${i}`);
@@ -53,13 +62,6 @@ function createInventory() {
   }
 }
 createInventory();
-
-// Temporary for coding stuff until we have an actual inventory system
-interface tempItem {
-  name: string;
-  icon: string;
-  amount: number;
-}
 
 interface slotData {
   label: string;
@@ -90,7 +92,7 @@ function replaceSlot(slotNum: number, item: tempItem) {
 
 // deno-lint-ignore no-unused-vars
 function findEmptySlot(): number {
-  for (let i = 0; i < INVENTORY_SLOT_AMOUNT; i++) {
+  for (let i = 0; i < INVENTORY_SLOT_COUNT; i++) {
     const slot = getSlotData(i);
 
     if (slot.label.toLowerCase() == "empty") {

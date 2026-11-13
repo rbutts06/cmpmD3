@@ -13,6 +13,7 @@ export type Direction = "north" | "south" | "east" | "west";
 export type GameState = {
   seed: number;
   player: Cell;
+  inventory: tempItem[];
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -33,7 +34,7 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 } };
+  return { seed, player: { x: 0, y: 0 }, inventory: new Array<tempItem>() };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -59,4 +60,87 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   state.player.x = to.x;
   state.player.y = to.y;
   return [{ type: "moved", from, to }];
+}
+
+export const INVENTORY_SLOT_COUNT = 8;
+
+/** Temporary item object type for coding stuff until we have an actual object type */
+export interface tempItem {
+  name: string;
+  icon: string;
+  amount: number;
+}
+
+/** The item placeholder for empty inventory slots */
+export const EMPTY_ITEM: tempItem = { name: "Empty", icon: "", amount: -1 };
+
+/**
+ * Adds an item to the inventory. Will place item in either the first empty slot or slot with a matching name.
+ *
+ * @param state The current game state to get the inventory from
+ * @param item The item to add
+ * @returns Returns success if there was space in the inventory and failure if there wasn't
+ */
+export function inventoryAdd(state: GameState, item: tempItem): boolean {
+  let slotIndex = findItem(state, item.name);
+  if (slotIndex > -1) {
+    state.inventory[slotIndex].amount += item.amount;
+    return (true);
+  }
+
+  slotIndex = findEmptySlot(state);
+  if (slotIndex > -1) {
+    state.inventory[slotIndex] = item;
+    return (true);
+  }
+
+  return (false);
+}
+
+/**
+ * Adds an item to the inventory. Will place item in either the first empty slot or slot with a matching name.
+ *
+ * @param state The current game state to get the inventory from
+ * @param item The item to add
+ */
+export function inventoryRemove(state: GameState, item: tempItem): boolean {
+  const slotIndex = findItem(state, item.name);
+  if (slotIndex > -1) {
+    const slot = state.inventory[slotIndex];
+    state.inventory[slotIndex].amount -= item.amount;
+
+    if (slot.amount <= 0) {
+      state.inventory[slotIndex] = EMPTY_ITEM;
+    }
+
+    return (true);
+  } else {
+    return (false);
+  }
+}
+
+/**
+ * Finds and returns the index of the first item that matches this name
+ *
+ * @param state The current game state to read inventory from
+ * @param itemName The name of the item to search for
+ * @returns The index of the item or -1 if it wasn't found
+ */
+export function findItem(state: GameState, itemName: string): number {
+  for (let i = 0; i < INVENTORY_SLOT_COUNT; i++) {
+    const slot = state.inventory[i];
+    if (slot.name == itemName) return i;
+  }
+
+  return (-1);
+}
+
+/**
+ * Finds and returns the first empty (null) index in the inventory.
+ *
+ * @param state The game state to read inventory from
+ * @returns Either the inidex of the first empty slot or -1 if none
+ */
+function findEmptySlot(state: GameState): number {
+  return (findItem(state, EMPTY_ITEM.name));
 }
