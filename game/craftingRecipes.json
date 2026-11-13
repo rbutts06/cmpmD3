@@ -1,0 +1,21 @@
+{
+  "recipes": [
+    {
+      "name": "rat burger",
+      "ingredients": [
+        {
+          "name": "rat",
+          "amount": 1
+        },
+        {
+          "name": "bread",
+          "amount": 1
+        },
+        {
+          "name": "tomato",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

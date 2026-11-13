@@ -20,6 +20,15 @@
         <p id="live" aria-live="polite"></p>
         <button id="mute" type="button" aria-pressed="false">Sound: on</button>
       </aside>
+
+      <div id="inventory" class="HUD">
+        <template id="inventorySlot-template">
+          <div id= "slot-0" class="inventorySlot">
+            <image id="itemIcon" class="itemIcon" src=""></image>
+            <p id="itemLabel" class="inventoryLabel">Empty</p>
+          </div>
+        </template>
+      </div>
     </main>
     <script type="module" src="/game/main.ts"></script>
   </body>
