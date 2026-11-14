@@ -27,11 +27,12 @@ const TERRAIN_COLORS: Record<Terrain, number> = {
   water: 0xfabf2a,
   rock: 0x6e6a66,
 };
-
-const object_assets: Record<string, string> = {
+/** @deprecated */
+const _object_assets: Record<string, string> = {
   rat: "rat",
   rodentia: "./assets/rodentia.png",
 };
+
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
 // the player without showing an unpainted edge.
 const CELLS_ACROSS = 16;
@@ -96,7 +97,7 @@ export class GridView extends Phaser.Scene {
   private makeObject() {
     createObjectPositions(this.seed);
     for (const object of objectPos) {
-      this.add.image(object.x, object.y, object_assets[object.object]);
+      this.add.image(object.x, object.y, object.object.name); //object_assets[object.object]);
     }
   }
 
@@ -108,6 +109,7 @@ export class GridView extends Phaser.Scene {
       case "blocked":
         return this.bump(event.at, event.toward);
       case "gathered":
+        console.log("Gathered!");
         return this.collect(event.at, event.item);
       default:
         // A new event type fails to type-check here until it has a presentation.

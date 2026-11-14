@@ -4,7 +4,8 @@
 
 //import { objectPos } from "./mod.ts";
 import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
-import { Gatherable } from "./mod.ts";
+import { Gatherable, hasGatherable, itemAt } from "./mod.ts";
+import { cellCenter } from "./objects.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -56,13 +57,39 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const from = { ...state.player };
   const to = { x: from.x + step.x, y: from.y + step.y };
   const terrain = terrainAt(state.seed, to.x, to.y);
+  const events: GameEvent[] = [];
+
   if (!isPassable(terrain)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
   //if gatherable is on cell {return gathered}
+  if (hasGatherable(state.seed, to.x, to.y)) {
+    const newEvent = gatherPossibleItem(state.seed, to.x, to.y);
+    if (newEvent != null) {
+      events.push(newEvent);
+    }
+  }
+
   state.player.x = to.x;
   state.player.y = to.y;
-  return [{ type: "moved", from, to }];
+  events.push({ type: "moved", from, to });
+
+  return events;
+}
+
+function gatherPossibleItem(
+  seed: number,
+  xPos: number,
+  yPos: number,
+): GameEvent | null {
+  const itemAtCell: Gatherable | null = itemAt(seed, xPos, yPos);
+  if (itemAtCell != null) { // Meaning it has already been grabbed
+    const { x, y }: Cell = cellCenter({ x: xPos, y: yPos });
+    return { type: "gathered", at: { x, y }, item: itemAtCell };
+  } else {
+    console.log(`Already gathered at (${xPos}, ${yPos})`);
+    return (null);
+  }
 }
 
 export const INVENTORY_SLOT_COUNT = 8;
