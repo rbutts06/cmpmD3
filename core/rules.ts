@@ -110,6 +110,7 @@ export const EMPTY_ITEM: Gatherable = {
  * @returns Returns success if there was space in the inventory and failure if there wasn't
  */
 export function inventoryAdd(state: GameState, item: Gatherable): boolean {
+  console.log(item);
   const slotIndex = findItem(state, item.name);
   if (slotIndex > -1) {
     state.inventory[slotIndex].amount += item.amount;
@@ -118,7 +119,7 @@ export function inventoryAdd(state: GameState, item: Gatherable): boolean {
   }
 
   if (inventoryFull(state.inventory) == false) {
-    state.inventory.push(item);
+    state.inventory.push(copyItem(item));
     console.log("Inventory is now", state.inventory);
     return (true);
   }
@@ -171,4 +172,12 @@ export function findItem(state: GameState, itemName: string): number {
  */
 function inventoryFull(inventory: Gatherable[]): boolean {
   return (inventory.length >= INVENTORY_SIZE);
+}
+
+function copyItem(original: Gatherable): Gatherable {
+  return ({
+    name: original.name,
+    amount: original.amount,
+    icon: original.icon,
+  });
 }
