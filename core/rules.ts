@@ -16,7 +16,7 @@ export type Direction = "north" | "south" | "east" | "west";
 export type GameState = {
   seed: number;
   player: Cell;
-  inventory: tempItem[];
+  inventory: Gatherable[];
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -26,7 +26,7 @@ export type Command = { type: "move"; direction: Direction };
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
-  | { type: "gathered"; at: Cell; item: Gatherable };
+  | { type: "gathered"; at: Cell; item: Gatherable; state: GameState };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -37,7 +37,7 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, inventory: new Array<tempItem>() };
+  return { seed, player: { x: 0, y: 0 }, inventory: new Array<Gatherable>() };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -64,7 +64,8 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   }
   //if gatherable is on cell {return gathered}
   if (hasGatherable(state.seed, to.x, to.y)) {
-    const newEvent = gatherPossibleItem(state.seed, to.x, to.y);
+    console.log(state);
+    const newEvent = gatherPossibleItem(state.seed, to.x, to.y, state);
     if (newEvent != null) {
       events.push(newEvent);
     }
@@ -81,11 +82,13 @@ function gatherPossibleItem(
   seed: number,
   xPos: number,
   yPos: number,
+  state: GameState,
 ): GameEvent | null {
+  console.log(state);
   const itemAtCell: Gatherable | null = itemAt(seed, xPos, yPos);
   if (itemAtCell != null) { // Meaning it has already been grabbed
     const { x, y }: Cell = cellCenter({ x: xPos, y: yPos });
-    return { type: "gathered", at: { x, y }, item: itemAtCell };
+    return { type: "gathered", at: { x, y }, item: itemAtCell, state: state };
   } else {
     console.log(`Already gathered at (${xPos}, ${yPos})`);
     return (null);
@@ -95,14 +98,13 @@ function gatherPossibleItem(
 export const INVENTORY_SLOT_COUNT = 8;
 
 /** Temporary item object type for coding stuff until we have an actual object type */
-export interface tempItem {
-  name: string;
-  icon: string;
-  amount: number;
-}
 
 /** The item placeholder for empty inventory slots */
-export const EMPTY_ITEM: tempItem = { name: "Empty", icon: "", amount: -1 };
+export const EMPTY_ITEM: Gatherable = {
+  name: "Empty",
+  icon: "./assets/blank.png",
+  amount: -1,
+};
 
 /**
  * Adds an item to the inventory. Will place item in either the first empty slot or slot with a matching name.
@@ -111,7 +113,7 @@ export const EMPTY_ITEM: tempItem = { name: "Empty", icon: "", amount: -1 };
  * @param item The item to add
  * @returns Returns success if there was space in the inventory and failure if there wasn't
  */
-export function inventoryAdd(state: GameState, item: tempItem): boolean {
+export function inventoryAdd(state: GameState, item: Gatherable): boolean {
   let slotIndex = findItem(state, item.name);
   if (slotIndex > -1) {
     state.inventory[slotIndex].amount += item.amount;
@@ -133,7 +135,7 @@ export function inventoryAdd(state: GameState, item: tempItem): boolean {
  * @param state The current game state to get the inventory from
  * @param item The item to add
  */
-export function inventoryRemove(state: GameState, item: tempItem): boolean {
+export function inventoryRemove(state: GameState, item: Gatherable): boolean {
   const slotIndex = findItem(state, item.name);
   if (slotIndex > -1) {
     const slot = state.inventory[slotIndex];

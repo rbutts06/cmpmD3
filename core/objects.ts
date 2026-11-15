@@ -7,10 +7,18 @@ export type Gatherable = {
   icon: `./assets/${string}`;
 };
 
-const rat: Gatherable = { name: "rat", amount: 1, icon: "./assets/rat.png" };
+export const rat: Gatherable = {
+  name: "rat",
+  amount: 1,
+  icon: "./assets/rat.png",
+};
+export const cheeseTree: Gatherable = {
+  name: "cheeseTree",
+  amount: 1,
+  icon: "./assets/cheeseTree.png",
+};
 
-// deno-lint-ignore no-unused-vars
-const rodentia: Gatherable = {
+export const rodentia: Gatherable = {
   name: "rodentia",
   amount: 1,
   icon: "./assets/rodentia.png",
@@ -24,8 +32,10 @@ interface objectTable {
 
 export const objectPos: objectTable[] = [];
 
-export function createObjectPositions(seed: number) {
+export function createObjectPositions(seed: number, items: Gatherable[]) {
+  let counter = 0;
   for (let xPos = -100; xPos < 100; xPos++) {
+    counter++;
     for (let yPos = -100; yPos < 100; yPos++) {
       if (
         isPassable(terrainAt(seed, xPos, yPos)) &&
@@ -34,7 +44,7 @@ export function createObjectPositions(seed: number) {
         const { x, y }: Cell = cellCenter({ x: xPos, y: yPos });
         objectPos.push(
           {
-            object: rat,
+            object: items[counter % items.length],
             x: x,
             y: y,
           },
@@ -82,13 +92,4 @@ export function cellCenter({ x, y }: Cell): Cell {
     x: x * 32 + 32 / 2,
     y: y * 32 + 32 / 2,
   };
-}
-
-export function destroy(item: Gatherable, cell: Cell) {
-  const index = objectPos.findIndex((object) =>
-    object.x === cell.x && object.y === cell.y && object.object === item
-  );
-  if (index !== -1) {
-    objectPos.splice(index, 1);
-  }
 }

@@ -1,8 +1,8 @@
 import {
   type GameEvent,
   type GameState,
+  Gatherable, //Remove later
   INVENTORY_SLOT_COUNT,
-  tempItem, //Remove later
   terrainAt,
 } from "../core/mod.ts";
 
@@ -78,7 +78,7 @@ function getSlotData(slotNum: number): slotData {
 }
 
 // deno-lint-ignore no-unused-vars
-function replaceSlot(slotNum: number, item: tempItem) {
+function replaceSlot(slotNum: number, item: Gatherable) {
   const inv = element("inventory");
 
   const slot = inv.querySelector(`.slot-${slotNum}`)!;

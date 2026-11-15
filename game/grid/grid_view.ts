@@ -9,10 +9,12 @@ import type {
   Terrain,
 } from "../../core/mod.ts";
 import {
+  cheeseTree,
   createObjectPositions,
-  destroy,
-  //inventoryAdd,
+  inventoryAdd,
   objectPos,
+  rat,
+  rodentia,
   terrainAt,
 } from "../../core/mod.ts";
 export const CELL_SIZE = 32;
@@ -22,8 +24,8 @@ const WALK_MS = 120;
 const BUMP_MS = 60;
 
 const TERRAIN_COLORS: Record<Terrain, number> = {
-  grass: 0x5d9e4a,
-  forest: 0x2f6b3a,
+  grass: 0xada639,
+  "cheese forest": 0x0dde83,
   water: 0xfabf2a,
   rock: 0x6e6a66,
 };
@@ -45,6 +47,7 @@ export function cellCenter({ x, y }: Cell): Cell {
   };
 }
 
+const items: Gatherable[] = [rat, cheeseTree, rodentia];
 // One output of the presenter. It shows events; it decides nothing.
 // Humble Object: http://xunitpatterns.com/Humble%20Object.html
 export class GridView extends Phaser.Scene {
@@ -62,6 +65,7 @@ export class GridView extends Phaser.Scene {
     this.load.image("player", "./assets/player.png");
     this.load.image("rat", "./assets/rat.png");
     this.load.image("rodentia", "./assets/rodentia.png");
+    this.load.image("cheeseTree", "./assets/cheeseTree.png");
   }
 
   create() {
@@ -95,13 +99,13 @@ export class GridView extends Phaser.Scene {
     );
   }
   private makeObject() {
-    createObjectPositions(this.seed);
+    createObjectPositions(this.seed, items);
     for (const object of objectPos) {
       this.add.image(object.x, object.y, object.object.name); //object_assets[object.object]);
     }
   }
 
-  show(event: GameEvent): Promise<void> {
+  show(event: GameEvent, state?: GameState): Promise<void> {
     switch (event.type) {
       case "moved":
         this.drawCellsAround(event.to);
@@ -110,7 +114,8 @@ export class GridView extends Phaser.Scene {
         return this.bump(event.at, event.toward);
       case "gathered":
         console.log("Gathered!");
-        return this.collect(event.at, event.item);
+        console.log(state);
+        return this.collect(event.at, event.item, state);
       default:
         // A new event type fails to type-check here until it has a presentation.
         event satisfies never;
@@ -129,9 +134,16 @@ export class GridView extends Phaser.Scene {
     });
   }
 
-  private collect(at: Cell, item: Gatherable): Promise<void> {
+  private collect(
+    at: Cell,
+    item: Gatherable,
+    state: GameState | undefined,
+  ): Promise<void> {
+    if (state == undefined) {
+      return new Promise((done) => done());
+    }
     return new Promise((done) => {
-      //inventoryAdd(state, item); (need to turn into tempItem)
+      inventoryAdd(state, item);
       destroy(item, at);
       console.log("gathered at: ", at);
       done();
@@ -170,6 +182,16 @@ export class GridView extends Phaser.Scene {
         );
       }
     }
+  }
+}
+
+export function destroy(item: Gatherable, cell: Cell) {
+  const index = objectPos.findIndex((object) =>
+    object.x === cell.x && object.y === cell.y && object.object === item
+  );
+  if (index !== -1) {
+    console.log("found");
+    objectPos.splice(index, 1);
   }
 }
 
