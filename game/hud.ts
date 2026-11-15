@@ -5,6 +5,7 @@ import {
   INVENTORY_SIZE,
   terrainAt,
 } from "../core/mod.ts";
+import { EMPTY_ITEM } from "../core/rules.ts";
 
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
@@ -29,39 +30,50 @@ export class Hud {
   constructor(state: GameState) {
     this.seed = state.seed;
     this.showPosition(state.player.x, state.player.y);
+    this.createInventory(state.inventory);
   }
 
   show(event: GameEvent) {
     element("live").textContent = describe(event);
     if (event.type === "moved") this.showPosition(event.to.x, event.to.y);
+    if (event.type === "gathered") this.createInventory(event.state.inventory);
   }
 
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = terrainAt(this.seed, x, y);
   }
-}
 
-/* to do:
- * - Update createInventory to use game state instead of importing INVENTORY_SLOT_COUNT
- * - See if I can add it to the hud class above
- */
+  private createInventory(inventory: Gatherable[]) {
+    console.log("--------------");
+    console.log(inventory);
 
-function createInventory() {
-  const inv = element("inventory") as HTMLDivElement;
-  const template = element("inventorySlot-template") as HTMLTemplateElement;
+    const inv = element("inventory") as HTMLDivElement;
+    const template = element("inventorySlot-template") as HTMLTemplateElement;
 
-  for (let i = 0; i < INVENTORY_SIZE; i++) {
-    const clone = template.content.cloneNode(true) as HTMLTemplateElement;
-    const newSlot = clone.querySelector(".inventorySlot") as HTMLDivElement;
-    newSlot.setAttribute("id", `slot-${i}`);
-    const icon = newSlot.querySelector(".itemIcon") as HTMLImageElement;
-    icon.setAttribute("src", "assets/egg.png");
+    inv.replaceChildren();
 
-    inv.append(newSlot);
+    for (let i = 0; i < INVENTORY_SIZE; i++) {
+      const clone = template.content.cloneNode(true)! as HTMLTemplateElement;
+      const newSlot = clone.querySelector(".inventorySlot")! as HTMLDivElement;
+      newSlot.setAttribute("id", `slot-${i}`);
+      const icon = newSlot.querySelector(".itemIcon")! as HTMLImageElement;
+      const label = newSlot.querySelector(
+        ".itemLabel",
+      )! as HTMLParagraphElement;
+
+      if (i < inventory.length) {
+        const item = inventory[i];
+        label.textContent = `${item.name} (${item.amount})`;
+        icon.src = item.icon;
+      } else {
+        label.textContent = EMPTY_ITEM.name;
+        icon.src = EMPTY_ITEM.icon;
+      }
+      inv.append(newSlot);
+    }
   }
 }
-createInventory();
 
 interface slotData {
   label: string;

@@ -21,14 +21,13 @@
         <button id="mute" type="button" aria-pressed="false">Sound: on</button>
       </aside>
 
-      <div id="inventory" class="HUD">
-        <template id="inventorySlot-template">
-          <div id= "slot-0" class="inventorySlot">
-            <image id="itemIcon" class="itemIcon" src=""></image>
-            <p id="itemLabel" class="inventoryLabel">Empty</p>
-          </div>
-        </template>
-      </div>
+      <div id="inventory" class="HUD"></div>
+      <template id="inventorySlot-template">
+        <div id= "slot-x" class="inventorySlot">
+          <image id="itemIcon" class="itemIcon" src=""></image>
+          <p id="itemLabel" class="itemLabel">Empty</p>
+        </div>
+      </template>
     </main>
     <script type="module" src="/game/main.ts"></script>
   </body>
