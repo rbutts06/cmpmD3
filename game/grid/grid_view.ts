@@ -100,7 +100,7 @@ export class GridView extends Phaser.Scene {
     }
   }
 
-  show(event: GameEvent, state?: GameState): Promise<void> {
+  show(event: GameEvent): Promise<void> {
     switch (event.type) {
       case "moved":
         this.drawCellsAround(event.to);
@@ -108,9 +108,7 @@ export class GridView extends Phaser.Scene {
       case "blocked":
         return this.bump(event.at, event.toward);
       case "gathered":
-        console.log("Gathered!");
-        console.log(state);
-        return this.collect(event.at, event.item, state);
+        return this.collect(event.at, event.item, event.state);
       default:
         // A new event type fails to type-check here until it has a presentation.
         event satisfies never;
@@ -132,15 +130,12 @@ export class GridView extends Phaser.Scene {
   private collect(
     at: Cell,
     item: Gatherable,
-    state: GameState | undefined,
+    state: GameState,
   ): Promise<void> {
-    if (state == undefined) {
-      return new Promise((done) => done());
-    }
     return new Promise((done) => {
       inventoryAdd(state, item);
       destroy(item, at);
-      console.log("gathered at: ", at);
+      console.log(`gathered \"${item.name}\" at: (${at.x}, ${at.y})`);
       done();
     });
   }
@@ -185,7 +180,6 @@ export function destroy(item: Gatherable, cell: Cell) {
     object.x === cell.x && object.y === cell.y && object.object === item
   );
   if (index !== -1) {
-    console.log("found");
     objectPos.splice(index, 1);
   }
 }

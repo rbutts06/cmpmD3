@@ -64,7 +64,6 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   }
   //if gatherable is on cell {return gathered}
   if (hasGatherable(state.seed, to.x, to.y)) {
-    console.log(state);
     const newEvent = gatherPossibleItem(state.seed, to.x, to.y, state);
     if (newEvent != null) {
       events.push(newEvent);
@@ -84,7 +83,6 @@ function gatherPossibleItem(
   yPos: number,
   state: GameState,
 ): GameEvent | null {
-  console.log(state);
   const itemAtCell: Gatherable | null = itemAt(seed, xPos, yPos);
   if (itemAtCell != null) { // Meaning it has already been grabbed
     const { x, y }: Cell = cellCenter({ x: xPos, y: yPos });
@@ -95,7 +93,7 @@ function gatherPossibleItem(
   }
 }
 
-export const INVENTORY_SLOT_COUNT = 8;
+export const INVENTORY_SIZE = 8;
 
 /** The item placeholder for empty inventory slots */
 export const EMPTY_ITEM: Gatherable = {
@@ -112,15 +110,16 @@ export const EMPTY_ITEM: Gatherable = {
  * @returns Returns success if there was space in the inventory and failure if there wasn't
  */
 export function inventoryAdd(state: GameState, item: Gatherable): boolean {
-  let slotIndex = findItem(state, item.name);
+  const slotIndex = findItem(state, item.name);
   if (slotIndex > -1) {
     state.inventory[slotIndex].amount += item.amount;
+    console.log("Inventory is now", state.inventory);
     return (true);
   }
 
-  slotIndex = findEmptySlot(state);
-  if (slotIndex > -1) {
-    state.inventory[slotIndex] = item;
+  if (inventoryFull(state.inventory) == false) {
+    state.inventory.push(item);
+    console.log("Inventory is now", state.inventory);
     return (true);
   }
 
@@ -157,20 +156,19 @@ export function inventoryRemove(state: GameState, item: Gatherable): boolean {
  * @returns The index of the item or -1 if it wasn't found
  */
 export function findItem(state: GameState, itemName: string): number {
-  for (let i = 0; i < INVENTORY_SLOT_COUNT; i++) {
-    const slot = state.inventory[i];
-    if (slot.name == itemName) return i;
+  for (let i = 0; i < INVENTORY_SIZE; i++) {
+    const currItem = state.inventory[i];
+    if (currItem?.name == itemName) return i;
   }
 
   return (-1);
 }
 
 /**
- * Finds and returns the first empty (null) index in the inventory.
- *
- * @param state The game state to read inventory from
- * @returns Either the inidex of the first empty slot or -1 if none
+ * Detect if the inventory is full.
+ * @param inventory The inventory attribute of the gamestate
+ * @returns True if the length is greater than or equal to the max inv size, otherwise false
  */
-function findEmptySlot(state: GameState): number {
-  return (findItem(state, EMPTY_ITEM.name));
+function inventoryFull(inventory: Gatherable[]): boolean {
+  return (inventory.length >= INVENTORY_SIZE);
 }

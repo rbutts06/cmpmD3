@@ -2,7 +2,7 @@ import {
   type GameEvent,
   type GameState,
   Gatherable,
-  INVENTORY_SLOT_COUNT,
+  INVENTORY_SIZE,
   terrainAt,
 } from "../core/mod.ts";
 
@@ -51,7 +51,7 @@ function createInventory() {
   const inv = element("inventory") as HTMLDivElement;
   const template = element("inventorySlot-template") as HTMLTemplateElement;
 
-  for (let i = 0; i < INVENTORY_SLOT_COUNT; i++) {
+  for (let i = 0; i < INVENTORY_SIZE; i++) {
     const clone = template.content.cloneNode(true) as HTMLTemplateElement;
     const newSlot = clone.querySelector(".inventorySlot") as HTMLDivElement;
     newSlot.setAttribute("id", `slot-${i}`);
@@ -92,7 +92,7 @@ function replaceSlot(slotNum: number, item: Gatherable) {
 
 // deno-lint-ignore no-unused-vars
 function findEmptySlot(): number {
-  for (let i = 0; i < INVENTORY_SLOT_COUNT; i++) {
+  for (let i = 0; i < INVENTORY_SIZE; i++) {
     const slot = getSlotData(i);
 
     if (slot.label.toLowerCase() == "empty") {
