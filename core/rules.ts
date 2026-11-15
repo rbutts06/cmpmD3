@@ -97,8 +97,6 @@ function gatherPossibleItem(
 
 export const INVENTORY_SLOT_COUNT = 8;
 
-/** Temporary item object type for coding stuff until we have an actual object type */
-
 /** The item placeholder for empty inventory slots */
 export const EMPTY_ITEM: Gatherable = {
   name: "Empty",

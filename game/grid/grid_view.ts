@@ -24,15 +24,10 @@ const WALK_MS = 120;
 const BUMP_MS = 60;
 
 const TERRAIN_COLORS: Record<Terrain, number> = {
-  grass: 0xada639,
-  "cheese forest": 0x0dde83,
-  water: 0xfabf2a,
-  rock: 0x6e6a66,
-};
-/** @deprecated */
-const _object_assets: Record<string, string> = {
-  rat: "rat",
-  rodentia: "./assets/rodentia.png",
+  "grass": 0xada639,
+  "cheese forest": 0x0dde83, // Was getting a weird error here about cheese forest not existing. I think it was mad that the rest weren't also strings
+  "water": 0xfabf2a,
+  "rock": 0x6e6a66,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind

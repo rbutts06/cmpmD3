@@ -1,7 +1,7 @@
 import {
   type GameEvent,
   type GameState,
-  Gatherable, //Remove later
+  Gatherable,
   INVENTORY_SLOT_COUNT,
   terrainAt,
 } from "../core/mod.ts";
