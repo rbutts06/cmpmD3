@@ -2,6 +2,8 @@
   "recipes": [
     {
       "name": "rat burger",
+      "amountOwned": 0,
+      "imgFile": "ratBurger",
       "ingredients": [
         {
           "name": "rat",
@@ -14,6 +16,21 @@
         {
           "name": "tomato",
           "amount": 1
+        }
+      ]
+    },
+    {
+      "name": "TEST_ITEM",
+      "amountOwned": 0,
+      "imgFile": "stove",
+      "ingredients": [
+        {
+          "name": "cheeseTree",
+          "amount": 1
+        },
+        {
+          "name": "rodentia",
+          "amount": 2
         }
       ]
     }

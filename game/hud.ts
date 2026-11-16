@@ -1,11 +1,14 @@
 import {
+  findItem,
   type GameEvent,
   type GameState,
   Gatherable,
   INVENTORY_SIZE,
+  inventoryRemove,
   terrainAt,
 } from "../core/mod.ts";
 import { EMPTY_ITEM } from "../core/rules.ts";
+import recipeInfo from "./craftingRecipes.json" with { type: "json" };
 
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
@@ -31,6 +34,7 @@ export class Hud {
     this.seed = state.seed;
     this.showPosition(state.player.x, state.player.y);
     this.createInventory(state.inventory);
+    this.createRecipeList(state);
   }
 
   show(event: GameEvent) {
@@ -71,6 +75,66 @@ export class Hud {
         icon.src = EMPTY_ITEM.icon;
       }
       inv.append(newSlot);
+    }
+  }
+
+  private createRecipeList(state: GameState): void {
+    const recipes = element("recipes") as HTMLDivElement;
+    const template = element("recipeSlot-template") as HTMLTemplateElement;
+
+    for (const recipe of recipeInfo.recipes) {
+      const clone = template.content.cloneNode(true)! as HTMLTemplateElement;
+
+      const newButton = clone.querySelector(
+        ".recipe-button",
+      ) as HTMLButtonElement;
+
+      newButton.title = recipe.name + ": ";
+      let ingredientIndex = 0;
+      for (const ingredient of recipe.ingredients) {
+        if (ingredientIndex == recipe.ingredients.length - 1) {
+          newButton.title += "and " + ingredient.amount + " " +
+            ingredient.name + ".";
+        } else {
+          newButton.title += ingredient.amount + " " + ingredient.name + ", ";
+        }
+        ingredientIndex++;
+      }
+
+      const buttonImg = clone.querySelector(".recipeIcon") as HTMLImageElement;
+
+      buttonImg.src = "./assets/" + recipe.imgFile + ".png";
+
+      const buttonLabel = clone.querySelector(
+        ".recipeLabel",
+      ) as HTMLHeadingElement;
+
+      buttonLabel.textContent = recipe.name + " (" + recipe.amountOwned + ")";
+
+      newButton?.addEventListener("click", (_event: MouseEvent) => {
+        for (const ingredient of recipe.ingredients) {
+          const itemIndex = findItem(state, ingredient.name);
+          if (
+            itemIndex == -1 ||
+            ingredient.amount > state.inventory[itemIndex].amount
+          ) {
+            console.log("can't craft a " + recipe.name + " right now.");
+            return;
+          }
+        }
+
+        recipe.amountOwned++;
+        for (const ingredient of recipe.ingredients) {
+          const itemIndex = findItem(state, ingredient.name);
+          for (let i = 0; i < ingredient.amount; i++) {
+            inventoryRemove(state, state.inventory[itemIndex]);
+          }
+        }
+
+        buttonLabel.textContent = recipe.name + "(" + recipe.amountOwned + ")";
+      });
+
+      recipes.append(newButton);
     }
   }
 }
