@@ -172,6 +172,14 @@ export class GridView extends Phaser.Scene {
   // the world itself is never stored.
   private drawCellsAround({ x: centerX, y: centerY }: Cell) {
     this.ground.clear();
+
+    const oldGroundTiles = this.children.list.filter((child) =>
+      child.name === "groundTile"
+    );
+    for (const tile of oldGroundTiles) {
+      tile.destroy();
+    }
+
     for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
       for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
         /*
@@ -184,17 +192,21 @@ export class GridView extends Phaser.Scene {
           CELL_SIZE - 1,
         );
         */
-        const tileTexture = this.add.image(
+
+        const groundTile = this.add.image(
           x * CELL_SIZE + CELL_SIZE / 2,
           y * CELL_SIZE + CELL_SIZE / 2,
           TERRAIN_TEXTURES[terrainAt(this.seed, x, y)],
         );
+
+        groundTile.setName("groundTile");
+
         //if we want to change the tints of the tiles, we can use this line
-        //tileTexture.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
-        tileTexture.setDepth(-1);
+        //groundTile.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
+        groundTile.setDepth(-1);
         const tileMask = this.ground.createGeometryMask();
 
-        tileTexture.setMask(tileMask);
+        groundTile.setMask(tileMask);
       }
     }
   }
