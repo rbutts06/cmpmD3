@@ -23,11 +23,18 @@ const VIEW_HEIGHT = 600;
 const WALK_MS = 120;
 const BUMP_MS = 60;
 
-const TERRAIN_COLORS: Record<Terrain, number> = {
+const _TERRAIN_COLORS: Record<Terrain, number> = {
   "grass": 0xada639,
   "cheese forest": 0x0dde83, // Was getting a weird error here about cheese forest not existing. I think it was mad that the rest weren't also strings
   "water": 0xfabf2a,
   "rock": 0x6e6a66,
+};
+
+const TERRAIN_TEXTURES: Record<Terrain, string> = {
+  "grass": "grass",
+  "cheese forest": "cheeseForest",
+  "water": "cheeseRiver",
+  "rock": "blueCheese",
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
@@ -57,6 +64,10 @@ export class GridView extends Phaser.Scene {
     this.start = { ...state.player };
   }
   preload(): void {
+    for (const [_terrainType, name] of Object.entries(TERRAIN_TEXTURES)) {
+      this.load.image(name, "./assets/" + name + ".png");
+    }
+
     this.load.image("player", "./assets/player.png");
     this.load.image("rat", "./assets/rat.png");
     this.load.image("rodentia", "./assets/rodentia.png");
@@ -163,13 +174,27 @@ export class GridView extends Phaser.Scene {
     this.ground.clear();
     for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
       for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
+        /*
         this.ground.fillStyle(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
+
         this.ground.fillRect(
           x * CELL_SIZE,
           y * CELL_SIZE,
           CELL_SIZE - 1,
           CELL_SIZE - 1,
         );
+        */
+        const tileTexture = this.add.image(
+          x * CELL_SIZE + CELL_SIZE / 2,
+          y * CELL_SIZE + CELL_SIZE / 2,
+          TERRAIN_TEXTURES[terrainAt(this.seed, x, y)],
+        );
+        //if we want to change the tints of the tiles, we can use this line
+        //tileTexture.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
+        tileTexture.setDepth(-1);
+        const tileMask = this.ground.createGeometryMask();
+
+        tileTexture.setMask(tileMask);
       }
     }
   }
