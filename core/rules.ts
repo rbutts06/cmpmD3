@@ -4,7 +4,7 @@
 
 //import { objectPos } from "./mod.ts";
 import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
-import { Gatherable, hasGatherable, itemAt } from "./mod.ts";
+import { EMPTY_ITEM, Gatherable, hasGatherable, itemAt } from "./mod.ts";
 import { cellCenter } from "./objects.ts";
 
 export type Cell = { x: number; y: number };
@@ -35,9 +35,15 @@ const STEPS: Record<Direction, Cell> = {
   west: { x: -1, y: 0 },
 };
 
+export const INVENTORY_SIZE = 8;
+
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, inventory: new Array<Gatherable>() };
+  return {
+    seed,
+    player: { x: 0, y: 0 },
+    inventory: initializeInventory(INVENTORY_SIZE),
+  };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -93,14 +99,15 @@ function gatherPossibleItem(
   }
 }
 
-export const INVENTORY_SIZE = 8;
+function initializeInventory(size: number) {
+  const inv: Gatherable[] = [];
 
-/** The item placeholder for empty inventory slots */
-export const EMPTY_ITEM: Gatherable = {
-  name: "Empty",
-  icon: "./assets/blank.png",
-  amount: -1,
-};
+  for (let i = 0; i < size; i++) {
+    inv.push(EMPTY_ITEM);
+  }
+
+  return inv;
+}
 
 /**
  * Adds an item to the inventory. Will place item in either the first empty slot or slot with a matching name.

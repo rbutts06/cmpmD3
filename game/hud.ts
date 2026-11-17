@@ -7,7 +7,6 @@ import {
   inventoryRemove,
   terrainAt,
 } from "../core/mod.ts";
-import { EMPTY_ITEM } from "../core/rules.ts";
 import recipeInfo from "./craftingRecipes.json" with { type: "json" };
 
 function element(id: string): HTMLElement {
@@ -33,14 +32,14 @@ export class Hud {
   constructor(state: GameState) {
     this.seed = state.seed;
     this.showPosition(state.player.x, state.player.y);
-    this.createInventory(state.inventory);
+    this.updateInventory(state.inventory);
     this.createRecipeList(state);
   }
 
   show(event: GameEvent) {
     element("live").textContent = describe(event);
     if (event.type === "moved") this.showPosition(event.to.x, event.to.y);
-    if (event.type === "gathered") this.createInventory(event.state.inventory);
+    if (event.type === "gathered") this.updateInventory(event.state.inventory);
   }
 
   private showPosition(x: number, y: number) {
@@ -48,33 +47,20 @@ export class Hud {
     element("terrain").textContent = terrainAt(this.seed, x, y);
   }
 
-  private createInventory(inventory: Gatherable[]) {
-    console.log("--------------");
+  private updateInventory(inventory: Gatherable[]) {
     console.log(inventory);
-
-    const inv = element("inventory") as HTMLDivElement;
+    const inventoryElement = element("inventory") as HTMLDivElement;
     const template = element("inventorySlot-template") as HTMLTemplateElement;
 
-    inv.replaceChildren();
+    inventoryElement.replaceChildren();
 
     for (let i = 0; i < INVENTORY_SIZE; i++) {
       const clone = template.content.cloneNode(true)! as HTMLTemplateElement;
       const newSlot = clone.querySelector(".inventorySlot")! as HTMLDivElement;
-      newSlot.setAttribute("id", `slot-${i}`);
-      const icon = newSlot.querySelector(".itemIcon")! as HTMLImageElement;
-      const label = newSlot.querySelector(
-        ".itemLabel",
-      )! as HTMLParagraphElement;
+      newSlot.setAttribute("id", `inventorySlot-${i}`);
 
-      if (i < inventory.length) {
-        const item = inventory[i];
-        label.textContent = `${item.name} (${item.amount})`;
-        icon.src = item.icon;
-      } else {
-        label.textContent = EMPTY_ITEM.name;
-        icon.src = EMPTY_ITEM.icon;
-      }
-      inv.append(newSlot);
+      inventoryElement.append(newSlot);
+      setInventorySlot(i, inventory[i]);
     }
   }
 
@@ -153,17 +139,16 @@ function getSlotData(slotNum: number): slotData {
   return ({ label: label.textContent, icon: icon.src });
 }
 
-// deno-lint-ignore no-unused-vars
-function replaceSlot(slotNum: number, item: Gatherable) {
-  const inv = element("inventory");
+function setInventorySlot(slotNum: number, item: Gatherable) {
+  // const inventoryElement = element("inventory") as HTMLDivElement;
+  const slot = document.getElementById(`inventorySlot-${slotNum}`)!; // Bad design. Fix later
+  const label = slot.querySelector(".itemLabel")! as HTMLParagraphElement;
+  const icon = slot.querySelector(".itemIcon")! as HTMLImageElement;
 
-  const slot = inv.querySelector(`.slot-${slotNum}`)!;
-
-  const label = slot.querySelector("itemLabel")!;
-  label.textContent = `${item.name} (${item.amount})`;
-
-  const icon = inv.querySelector(".itemIcon")! as HTMLImageElement;
-  icon.setAttribute("src", item.icon);
+  label.textContent = (item.amount > 0)
+    ? `${item.name} (${item.amount})`
+    : item.name;
+  icon.src = item.icon;
 }
 
 // deno-lint-ignore no-unused-vars
