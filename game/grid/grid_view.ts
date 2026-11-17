@@ -37,6 +37,26 @@ const TERRAIN_TEXTURES: Record<Terrain, string> = {
   "rock": "blueCheese",
 };
 
+import grassUrl from "../../assets/grass.png";
+import cheeseFURL from "../../assets/cheeseForest.png";
+import waterURL from "../../assets/cheeseRiver.png";
+import rockURL from "../../assets/blueCheese.png";
+import ratURL from "../../assets/rat.png";
+import rodentiaURL from "../../assets/rodentia.png";
+import treeURL from "../../assets/cheeseTree.png";
+import playerURL from "../../assets/player.png";
+
+const ASSET_URLS = {
+  grass: grassUrl,
+  cheeseForest: cheeseFURL,
+  cheeseRiver: waterURL,
+  blueCheese: rockURL,
+  rat: ratURL,
+  rodentia: rodentiaURL,
+  cheeseTree: treeURL,
+  player: playerURL,
+};
+
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
 // the player without showing an unpainted edge.
 const CELLS_ACROSS = 16;
@@ -64,14 +84,9 @@ export class GridView extends Phaser.Scene {
     this.start = { ...state.player };
   }
   preload(): void {
-    for (const [_terrainType, name] of Object.entries(TERRAIN_TEXTURES)) {
-      this.load.image(name, "./assets/" + name + ".png");
+    for (const [name, url] of Object.entries(ASSET_URLS)) {
+      this.load.image(name, url);
     }
-
-    this.load.image("player", "./assets/player.png");
-    this.load.image("rat", "./assets/rat.png");
-    this.load.image("rodentia", "./assets/rodentia.png");
-    this.load.image("cheeseTree", "./assets/cheeseTree.png");
   }
 
   create() {
