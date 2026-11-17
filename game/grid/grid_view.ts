@@ -183,9 +183,17 @@ export class GridView extends Phaser.Scene {
     });
   }
 
+  private *cellsNearby({ x: centerX, y: centerY }: Cell) {
+    for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
+      for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
+        yield { x, y };
+      }
+    }
+  }
+
   // Paint only what is near the camera. Asking the core again costs little, and
   // the world itself is never stored.
-  private drawCellsAround({ x: centerX, y: centerY }: Cell) {
+  private drawCellsAround(cell: Cell) {
     this.ground.clear();
 
     const oldGroundTiles = this.children.list.filter((child) =>
@@ -195,9 +203,8 @@ export class GridView extends Phaser.Scene {
       tile.destroy();
     }
 
-    for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
-      for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
-        /*
+    for (const { x, y } of this.cellsNearby(cell)) {
+      /*
         this.ground.fillStyle(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
 
         this.ground.fillRect(
@@ -208,21 +215,20 @@ export class GridView extends Phaser.Scene {
         );
         */
 
-        const groundTile = this.add.image(
-          x * CELL_SIZE + CELL_SIZE / 2,
-          y * CELL_SIZE + CELL_SIZE / 2,
-          TERRAIN_TEXTURES[terrainAt(this.seed, x, y)],
-        );
+      const groundTile = this.add.image(
+        x * CELL_SIZE + CELL_SIZE / 2,
+        y * CELL_SIZE + CELL_SIZE / 2,
+        TERRAIN_TEXTURES[terrainAt(this.seed, x, y)],
+      );
 
-        groundTile.setName("groundTile");
+      groundTile.setName("groundTile");
 
-        //if we want to change the tints of the tiles, we can use this line
-        //groundTile.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
-        groundTile.setDepth(-1);
-        const tileMask = this.ground.createGeometryMask();
+      //if we want to change the tints of the tiles, we can use this line
+      //groundTile.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
+      groundTile.setDepth(-1);
+      const tileMask = this.ground.createGeometryMask();
 
-        groundTile.setMask(tileMask);
-      }
+      groundTile.setMask(tileMask);
     }
   }
 }
