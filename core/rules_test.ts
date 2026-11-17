@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert";
+import { assert, assertEquals } from "@std/assert";
 import {
   apply,
   EMPTY_ITEM,
@@ -6,6 +6,7 @@ import {
   isPassable,
   terrainAt,
 } from "./mod.ts";
+import { hasGatherable } from "./objects.ts";
 
 // Each test has a Given-When-Then shape: https://martinfowler.com/bliki/GivenWhenThen.html
 const SEED = 121;
@@ -87,4 +88,15 @@ Deno.test("an event keeps its cells while state moves on", () => {
     from: { x: x + 1, y },
     to: { x, y },
   }]);
+});
+
+Deno.test("there is a known gatherable at -1,-8", () => {
+  const state: GameState = {
+    seed: SEED,
+    player: { x: -1, y: -8 },
+    inventory: [],
+  };
+
+  const res = hasGatherable(state.seed, state.player.x, state.player.y);
+  assert(res, "no gatherable here");
 });
