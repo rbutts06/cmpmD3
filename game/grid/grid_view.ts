@@ -9,6 +9,7 @@ import type {
   Terrain,
 } from "../../core/mod.ts";
 import {
+  bread,
   cheeseTree,
   createObjectPositions,
   inventoryAdd,
@@ -16,6 +17,7 @@ import {
   rat,
   rodentia,
   terrainAt,
+  tomato,
 } from "../../core/mod.ts";
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
@@ -45,6 +47,12 @@ import ratURL from "../../assets/rat.png";
 import rodentiaURL from "../../assets/rodentia.png";
 import treeURL from "../../assets/cheeseTree.png";
 import playerURL from "../../assets/player.png";
+import breadURL from "../../assets/bread.png";
+import tomatoURL from "../../assets/tomato.png";
+import ratBurgerURL from "../../assets/ratBurger.png";
+import ratvioliURL from "../../assets/ratvioli.png";
+import cheeseURL from "../../assets/cheese.png";
+import ratPotionURL from "../../assets/ratPotion.png";
 
 const ASSET_URLS = {
   grass: grassUrl,
@@ -55,6 +63,12 @@ const ASSET_URLS = {
   rodentia: rodentiaURL,
   cheeseTree: treeURL,
   player: playerURL,
+  bread: breadURL,
+  tomato: tomatoURL,
+  ratBurgerItem: ratBurgerURL,
+  ratvioliItem: ratvioliURL,
+  cheeseItem: cheeseURL,
+  ratPotionItem: ratPotionURL,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
@@ -69,7 +83,7 @@ export function cellCenter({ x, y }: Cell): Cell {
   };
 }
 
-const items: Gatherable[] = [rat, cheeseTree, rodentia];
+const items: Gatherable[] = [rat, cheeseTree, rodentia, bread, tomato];
 // One output of the presenter. It shows events; it decides nothing.
 // Humble Object: http://xunitpatterns.com/Humble%20Object.html
 export class GridView extends Phaser.Scene {
