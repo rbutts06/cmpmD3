@@ -15,6 +15,10 @@ import {
 } from "../core/objects.ts";
 import { EMPTY_ITEM, inventoryAdd } from "../core/rules.ts";
 import recipeInfo from "./craftingRecipes.json" with { type: "json" };
+import "../assets/ratBurger.png";
+import "../assets/ratvioli.png";
+import "../assets/cheese.png";
+import "../assets/ratPotion.png";
 
 let recipesCrafted = 0;
 
