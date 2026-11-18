@@ -31,6 +31,7 @@ function besideEasternCell(passable: boolean): GameState {
           EMPTY_ITEM,
           EMPTY_ITEM,
         ],
+        gatheredCells: [],
       };
     }
   }
@@ -48,6 +49,7 @@ Deno.test("moving onto passable terrain moves the player", () => {
     type: "moved",
     from: { x, y },
     to: { x: x + 1, y },
+    state,
   }]);
 });
 
@@ -82,11 +84,13 @@ Deno.test("an event keeps its cells while state moves on", () => {
     type: "moved",
     from: { x, y },
     to: { x: x + 1, y },
+    state,
   }]);
   assertEquals(second, [{
     type: "moved",
     from: { x: x + 1, y },
     to: { x, y },
+    state,
   }]);
 });
 
@@ -95,6 +99,7 @@ Deno.test("there is a known gatherable at -1,-8", () => {
     seed: SEED,
     player: { x: -1, y: -8 },
     inventory: [],
+    gatheredCells: [],
   };
 
   const res = hasGatherable(state.seed, state.player.x, state.player.y);

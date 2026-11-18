@@ -75,6 +75,7 @@ const items: Gatherable[] = [rat, cheeseTree, rodentia];
 export class GridView extends Phaser.Scene {
   private readonly seed: number;
   private readonly start: Cell;
+  private readonly startState: GameState;
   private ground!: Phaser.GameObjects.Graphics;
   private marker!: Phaser.GameObjects.Image;
 
@@ -82,6 +83,7 @@ export class GridView extends Phaser.Scene {
     super("grid");
     this.seed = state.seed;
     this.start = { ...state.player };
+    this.startState = state;
   }
   preload(): void {
     for (const [name, url] of Object.entries(ASSET_URLS)) {
@@ -94,9 +96,9 @@ export class GridView extends Phaser.Scene {
     const { x, y } = cellCenter(this.start);
     this.marker = this.add.image(x, y, "player");
     this.cameras.main.startFollow(this.marker, true, 0.2, 0.2);
-    this.drawCellsAround(this.start);
+    createObjectPositions(this.seed, items);
+    this.drawCellsAround(this.start, this.startState);
     this.fitToDisplay();
-    this.makeObject();
   }
 
   // Phaser has no device-pixel setting of its own. So the canvas backing store is
@@ -119,17 +121,11 @@ export class GridView extends Phaser.Scene {
       { once: true },
     );
   }
-  private makeObject() {
-    createObjectPositions(this.seed, items);
-    for (const object of objectPos) {
-      this.add.image(object.x, object.y, object.object.name); //object_assets[object.object]);
-    }
-  }
 
   show(event: GameEvent): Promise<void> {
     switch (event.type) {
       case "moved":
-        this.drawCellsAround(event.to);
+        this.drawCellsAround(event.to, event.state);
         return this.walk(event.to);
       case "blocked":
         return this.bump(event.at, event.toward);
@@ -193,8 +189,23 @@ export class GridView extends Phaser.Scene {
 
   // Paint only what is near the camera. Asking the core again costs little, and
   // the world itself is never stored.
-  private drawCellsAround(cell: Cell) {
+  private drawCellsAround(cell: Cell, state: GameState) {
     this.ground.clear();
+
+    const oldGatherables = this.children.list.filter((child) =>
+      child.name === "gatherable"
+    );
+    for (const gatherable of oldGatherables) {
+      gatherable.destroy();
+    }
+
+    for (const object of objectPos) {
+      const checkString = "x:" + object.x + ",y:" + object.y;
+      if (!state.gatheredCells.includes(checkString)) {
+        const image = this.add.image(object.x, object.y, object.object.name);
+        image.setName("gatherable");
+      }
+    }
 
     const oldGroundTiles = this.children.list.filter((child) =>
       child.name === "groundTile"

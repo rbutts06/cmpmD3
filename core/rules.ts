@@ -17,6 +17,7 @@ export type GameState = {
   seed: number;
   player: Cell;
   inventory: Gatherable[];
+  gatheredCells: string[];
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -24,7 +25,7 @@ export type Command = { type: "move"; direction: Direction };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
-  | { type: "moved"; from: Cell; to: Cell }
+  | { type: "moved"; from: Cell; to: Cell; state: GameState }
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
   | { type: "gathered"; at: Cell; item: Gatherable; state: GameState };
 
@@ -37,7 +38,12 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, inventory: new Array<Gatherable>() };
+  return {
+    seed,
+    player: { x: 0, y: 0 },
+    inventory: new Array<Gatherable>(),
+    gatheredCells: [],
+  };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -72,7 +78,7 @@ function move(state: GameState, direction: Direction): GameEvent[] {
 
   state.player.x = to.x;
   state.player.y = to.y;
-  events.push({ type: "moved", from, to });
+  events.push({ type: "moved", from, to, state });
 
   return events;
 }
@@ -86,6 +92,8 @@ function gatherPossibleItem(
   const itemAtCell: Gatherable | null = itemAt(seed, xPos, yPos);
   if (itemAtCell != null) { // Meaning it has already been grabbed
     const { x, y }: Cell = cellCenter({ x: xPos, y: yPos });
+    state.gatheredCells.push("x:" + xPos + ",y:" + yPos);
+    console.log(state.gatheredCells);
     return { type: "gathered", at: { x, y }, item: itemAtCell, state: state };
   } else {
     console.log(`Already gathered at (${xPos}, ${yPos})`);
