@@ -125,7 +125,7 @@ export class Hud {
       let ingredientIndex = 0;
       for (const ingredient of recipe.ingredients) {
         if (ingredientIndex == recipe.ingredients.length - 1) {
-          newButton.title += "and " + ingredient.amount + " " +
+          newButton.title += " " + ingredient.amount + " " +
             ingredient.name + ".";
         } else {
           newButton.title += ingredient.amount + " " + ingredient.name + ", ";
