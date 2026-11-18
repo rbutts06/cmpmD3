@@ -16,6 +16,8 @@ import {
 import { EMPTY_ITEM, inventoryAdd } from "../core/rules.ts";
 import recipeInfo from "./craftingRecipes.json" with { type: "json" };
 
+let recipesCrafted = 0;
+
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
 }
@@ -52,6 +54,7 @@ export class Hud {
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = terrainAt(this.seed, x, y);
+    element("win").textContent = `${recipesCrafted}/4`;
   }
 
   private createInventory(inventory: Gatherable[]) {
@@ -147,6 +150,9 @@ export class Hud {
           }
         }
         recipeItem = this.recipeToItem(recipe.name);
+        if (recipe.amountOwned == 0) {
+          recipesCrafted++;
+        }
         recipe.amountOwned++;
         inventoryAdd(state, recipeItem);
         for (const ingredient of recipe.ingredients) {
