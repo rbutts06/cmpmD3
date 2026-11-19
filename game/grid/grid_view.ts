@@ -9,6 +9,7 @@ import type {
   Terrain,
 } from "../../core/mod.ts";
 import {
+  bread,
   cheeseTree,
   createObjectPositions,
   inventoryAdd,
@@ -16,6 +17,7 @@ import {
   rat,
   rodentia,
   terrainAt,
+  tomato,
 } from "../../core/mod.ts";
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
@@ -37,6 +39,38 @@ const TERRAIN_TEXTURES: Record<Terrain, string> = {
   "rock": "blueCheese",
 };
 
+import grassUrl from "../../assets/grass.png";
+import cheeseFURL from "../../assets/cheeseForest.png";
+import waterURL from "../../assets/cheeseRiver.png";
+import rockURL from "../../assets/blueCheese.png";
+import ratURL from "../../assets/rat.png";
+import rodentiaURL from "../../assets/rodentia.png";
+import treeURL from "../../assets/cheeseTree.png";
+import playerURL from "../../assets/player.png";
+import breadURL from "../../assets/bread.png";
+import tomatoURL from "../../assets/tomato.png";
+import ratBurgerURL from "../../assets/ratBurger.png";
+import ratvioliURL from "../../assets/ratvioli.png";
+import cheeseURL from "../../assets/cheese.png";
+import ratPotionURL from "../../assets/ratPotion.png";
+
+const ASSET_URLS = {
+  grass: grassUrl,
+  cheeseForest: cheeseFURL,
+  cheeseRiver: waterURL,
+  blueCheese: rockURL,
+  rat: ratURL,
+  rodentia: rodentiaURL,
+  cheeseTree: treeURL,
+  player: playerURL,
+  bread: breadURL,
+  tomato: tomatoURL,
+  ratBurgerItem: ratBurgerURL,
+  ratvioliItem: ratvioliURL,
+  cheeseItem: cheeseURL,
+  ratPotionItem: ratPotionURL,
+};
+
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
 // the player without showing an unpainted edge.
 const CELLS_ACROSS = 16;
@@ -49,12 +83,13 @@ export function cellCenter({ x, y }: Cell): Cell {
   };
 }
 
-const items: Gatherable[] = [rat, cheeseTree, rodentia];
+const items: Gatherable[] = [rat, cheeseTree, rodentia, bread, tomato];
 // One output of the presenter. It shows events; it decides nothing.
 // Humble Object: http://xunitpatterns.com/Humble%20Object.html
 export class GridView extends Phaser.Scene {
   private readonly seed: number;
   private readonly start: Cell;
+  private readonly startState: GameState;
   private ground!: Phaser.GameObjects.Graphics;
   private marker!: Phaser.GameObjects.Image;
 
@@ -62,16 +97,12 @@ export class GridView extends Phaser.Scene {
     super("grid");
     this.seed = state.seed;
     this.start = { ...state.player };
+    this.startState = state;
   }
   preload(): void {
-    for (const [_terrainType, name] of Object.entries(TERRAIN_TEXTURES)) {
-      this.load.image(name, "./assets/" + name + ".png");
+    for (const [name, url] of Object.entries(ASSET_URLS)) {
+      this.load.image(name, url);
     }
-
-    this.load.image("player", "./assets/player.png");
-    this.load.image("rat", "./assets/rat.png");
-    this.load.image("rodentia", "./assets/rodentia.png");
-    this.load.image("cheeseTree", "./assets/cheeseTree.png");
   }
 
   create() {
@@ -79,9 +110,9 @@ export class GridView extends Phaser.Scene {
     const { x, y } = cellCenter(this.start);
     this.marker = this.add.image(x, y, "player");
     this.cameras.main.startFollow(this.marker, true, 0.2, 0.2);
-    this.drawCellsAround(this.start);
+    createObjectPositions(this.seed, items);
+    this.drawCellsAround(this.start, this.startState);
     this.fitToDisplay();
-    this.makeObject();
   }
 
   // Phaser has no device-pixel setting of its own. So the canvas backing store is
@@ -104,17 +135,11 @@ export class GridView extends Phaser.Scene {
       { once: true },
     );
   }
-  private makeObject() {
-    createObjectPositions(this.seed, items);
-    for (const object of objectPos) {
-      this.add.image(object.x, object.y, object.object.name); //object_assets[object.object]);
-    }
-  }
 
   show(event: GameEvent): Promise<void> {
     switch (event.type) {
       case "moved":
-        this.drawCellsAround(event.to);
+        this.drawCellsAround(event.to, event.state);
         return this.walk(event.to);
       case "blocked":
         return this.bump(event.at, event.toward);
@@ -168,10 +193,33 @@ export class GridView extends Phaser.Scene {
     });
   }
 
+  private *cellsNearby({ x: centerX, y: centerY }: Cell) {
+    for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
+      for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
+        yield { x, y };
+      }
+    }
+  }
+
   // Paint only what is near the camera. Asking the core again costs little, and
   // the world itself is never stored.
-  private drawCellsAround({ x: centerX, y: centerY }: Cell) {
+  private drawCellsAround(cell: Cell, state: GameState) {
     this.ground.clear();
+
+    const oldGatherables = this.children.list.filter((child) =>
+      child.name === "gatherable"
+    );
+    for (const gatherable of oldGatherables) {
+      gatherable.destroy();
+    }
+
+    for (const object of objectPos) {
+      const checkString = "x:" + object.x + ",y:" + object.y;
+      if (!state.gatheredCells.includes(checkString)) {
+        const image = this.add.image(object.x, object.y, object.object.name);
+        image.setName("gatherable");
+      }
+    }
 
     const oldGroundTiles = this.children.list.filter((child) =>
       child.name === "groundTile"
@@ -180,9 +228,8 @@ export class GridView extends Phaser.Scene {
       tile.destroy();
     }
 
-    for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
-      for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
-        /*
+    for (const { x, y } of this.cellsNearby(cell)) {
+      /*
         this.ground.fillStyle(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
 
         this.ground.fillRect(
@@ -193,21 +240,20 @@ export class GridView extends Phaser.Scene {
         );
         */
 
-        const groundTile = this.add.image(
-          x * CELL_SIZE + CELL_SIZE / 2,
-          y * CELL_SIZE + CELL_SIZE / 2,
-          TERRAIN_TEXTURES[terrainAt(this.seed, x, y)],
-        );
+      const groundTile = this.add.image(
+        x * CELL_SIZE + CELL_SIZE / 2,
+        y * CELL_SIZE + CELL_SIZE / 2,
+        TERRAIN_TEXTURES[terrainAt(this.seed, x, y)],
+      );
 
-        groundTile.setName("groundTile");
+      groundTile.setName("groundTile");
 
-        //if we want to change the tints of the tiles, we can use this line
-        //groundTile.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
-        groundTile.setDepth(-1);
-        const tileMask = this.ground.createGeometryMask();
+      //if we want to change the tints of the tiles, we can use this line
+      //groundTile.setTint(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
+      groundTile.setDepth(-1);
+      const tileMask = this.ground.createGeometryMask();
 
-        groundTile.setMask(tileMask);
-      }
+      groundTile.setMask(tileMask);
     }
   }
 }

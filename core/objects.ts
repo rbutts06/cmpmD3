@@ -30,6 +30,36 @@ export const rodentia: Gatherable = {
   amount: 1,
   icon: "./assets/rodentia.png",
 };
+export const bread: Gatherable = {
+  name: "bread",
+  amount: 1,
+  icon: "./assets/bread.png",
+};
+export const tomato: Gatherable = {
+  name: "tomato",
+  amount: 1,
+  icon: "./assets/tomato.png",
+};
+export const cheeseItem: Gatherable = {
+  name: "cheese",
+  amount: 1,
+  icon: "./assets/cheese.png",
+};
+export const ratvioliItem: Gatherable = {
+  name: "ratvioli",
+  amount: 1,
+  icon: "./assets/ratvioli.png",
+};
+export const ratPotionItem: Gatherable = {
+  name: "ratPotion",
+  amount: 1,
+  icon: "./assets/ratPotion.png",
+};
+export const ratBurgerItem: Gatherable = {
+  name: "ratBurger",
+  amount: 1,
+  icon: "./assets/ratBurger.png",
+};
 
 interface objectTable {
   object: Gatherable;

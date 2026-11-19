@@ -1,6 +1,15 @@
 {
   "recipes": [
     {
+      "name": "cheese",
+      "amountOwned": 0,
+      "imgFile": "cheese",
+      "ingredients": [{
+        "name": "cheeseTree",
+        "amount": 2
+      }]
+    },
+    {
       "name": "rat burger",
       "amountOwned": 0,
       "imgFile": "ratBurger",
@@ -16,21 +25,44 @@
         {
           "name": "tomato",
           "amount": 1
+        },
+        {
+          "name": "cheese",
+          "amount": 1
         }
       ]
     },
     {
-      "name": "TEST_ITEM",
+      "name": "rat potion",
       "amountOwned": 0,
-      "imgFile": "stove",
+      "imgFile": "ratPotion",
       "ingredients": [
         {
-          "name": "cheeseTree",
-          "amount": 1
+          "name": "rat",
+          "amount": 2
         },
         {
           "name": "rodentia",
           "amount": 2
+        }
+      ]
+    },
+    {
+      "name": "ratvioli",
+      "amountOwned": 0,
+      "imgFile": "ratvioli",
+      "ingredients": [
+        {
+          "name": "tomato",
+          "amount": 2
+        },
+        {
+          "name": "rat",
+          "amount": 1
+        },
+        {
+          "name": "cheese",
+          "amount": 1
         }
       ]
     }

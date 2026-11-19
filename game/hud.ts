@@ -7,7 +7,20 @@ import {
   inventoryRemove,
   terrainAt,
 } from "../core/mod.ts";
+import {
+  cheeseItem,
+  ratBurgerItem,
+  ratPotionItem,
+  ratvioliItem,
+} from "../core/objects.ts";
+import { EMPTY_ITEM, inventoryAdd } from "../core/rules.ts";
 import recipeInfo from "./craftingRecipes.json" with { type: "json" };
+import "../assets/ratBurger.png";
+import "../assets/ratvioli.png";
+import "../assets/cheese.png";
+import "../assets/ratPotion.png";
+
+let recipesCrafted = 0;
 
 function element(id: string): HTMLElement {
   return document.getElementById(id)!;
@@ -45,6 +58,7 @@ export class Hud {
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = terrainAt(this.seed, x, y);
+    element("win").textContent = `${recipesCrafted}/4`;
   }
 
   private updateInventory(inventory: Gatherable[]) {
@@ -64,9 +78,28 @@ export class Hud {
     }
   }
 
+  private recipeToItem(name: string): Gatherable {
+    switch (name) {
+      case "ratvioli": {
+        return ratvioliItem;
+      }
+      case "rat burger": {
+        return ratBurgerItem;
+      }
+      case "cheese": {
+        return cheeseItem;
+      }
+      case "rat potion": {
+        return ratPotionItem;
+      }
+    }
+    return EMPTY_ITEM;
+  }
+
   private createRecipeList(state: GameState): void {
     const recipes = element("recipes") as HTMLDivElement;
     const template = element("recipeSlot-template") as HTMLTemplateElement;
+    let recipeItem: Gatherable;
 
     for (const recipe of recipeInfo.recipes) {
       const clone = template.content.cloneNode(true)! as HTMLTemplateElement;
@@ -79,7 +112,7 @@ export class Hud {
       let ingredientIndex = 0;
       for (const ingredient of recipe.ingredients) {
         if (ingredientIndex == recipe.ingredients.length - 1) {
-          newButton.title += "and " + ingredient.amount + " " +
+          newButton.title += " " + ingredient.amount + " " +
             ingredient.name + ".";
         } else {
           newButton.title += ingredient.amount + " " + ingredient.name + ", ";
@@ -96,7 +129,6 @@ export class Hud {
       ) as HTMLHeadingElement;
 
       buttonLabel.textContent = recipe.name + " (" + recipe.amountOwned + ")";
-
       newButton?.addEventListener("click", (_event: MouseEvent) => {
         for (const ingredient of recipe.ingredients) {
           const itemIndex = findItem(state, ingredient.name);
@@ -108,8 +140,12 @@ export class Hud {
             return;
           }
         }
-
+        recipeItem = this.recipeToItem(recipe.name);
+        if (recipe.amountOwned == 0) {
+          recipesCrafted++;
+        }
         recipe.amountOwned++;
+        inventoryAdd(state, recipeItem);
         for (const ingredient of recipe.ingredients) {
           const itemIndex = findItem(state, ingredient.name);
           for (let i = 0; i < ingredient.amount; i++) {
