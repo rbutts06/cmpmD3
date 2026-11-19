@@ -7,7 +7,7 @@ Use the arrow keys or WASD to walk around the map and collect different resource
 
 To add more recipes the only file that needs to be edited is craftingRecipes.json. Simply add the name, image file, and how many of each ingredient it needs. The rest is handled in hud.ts.
 
-## To run locally: 
+## To run locally:
 Install Deno and Git, clone this repository, and open a terminal in its root folder.
 
 Run setup once per clone:
