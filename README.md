@@ -1,8 +1,24 @@
 # D3 starter
 
-Target: The player is a farmer who grows rats out of the ground and uses them for cooking, potions, and generating money. Rats are put to work in a mill where they generate power and money for the player. The game ends when the player has so many rats (number TBD) they revolt against the player.
+Target: The player is a farmer who harvests rats and other resources out of the ground and uses them for cooking and potions. The game ends when the player has collected all the craftable items.
 
-Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) and [Git](https://git-scm.com/downloads). Create your own repository from this template, clone it, open a terminal in that folder, and run `deno task setup` once. Run `deno task dev` and open the local URL printed in the terminal (normally `http://localhost:3000`). Arrow keys move. Add `?seed=7` to the URL for another world. Open the repository folder itself in VS Code, not a parent folder, and accept the recommended Deno extension. If Phaser still shows errors or `any` after `deno task setup`, type or save in that file once.
+## How to Play:
+Use the arrow keys or WASD to walk around the map and collect different resources. To craft, press the button for the recipe you wish to craft. If you're not sure what each recipe needs, hover your mouse over the button.
+
+To add more recipes the only file that needs to be edited is craftingRecipes.json. Simply add the name, image file, and how many of each ingredient it needs. The rest is handled in hud.ts.
+
+## To run locally: 
+Install Deno and Git, clone this repository, and open a terminal in its root folder.
+
+Run setup once per clone:
+```bash
+deno task setup
+```
+Start a local server:
+```bash
+deno task dev
+```
+Open the URL printed by the server. Add ?seed=121 for the world used by the manual test script.
 
 ## Two folders, two rules
 
