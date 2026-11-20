@@ -145,13 +145,10 @@ export class Hud {
           recipesCrafted++;
         }
         recipe.amountOwned++;
-        inventoryAdd(state, recipeItem);
         for (const ingredient of recipe.ingredients) {
-          const itemIndex = findItem(state, ingredient.name);
-          for (let i = 0; i < ingredient.amount; i++) {
-            inventoryRemove(state, state.inventory[itemIndex]);
-          }
+          inventoryRemove(state, ingredient.name, ingredient.amount);
         }
+        inventoryAdd(state, recipeItem);
 
         buttonLabel.textContent = recipe.name + "(" + recipe.amountOwned + ")";
       });

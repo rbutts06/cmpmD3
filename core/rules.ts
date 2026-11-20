@@ -126,16 +126,15 @@ export function inventoryAdd(state: GameState, item: Gatherable): boolean {
   if (slotIndex > -1) {
     state.inventory[slotIndex].amount += item.amount;
     console.log(`Stacked ${item.name} at ${slotIndex}`);
-    console.log("Inventory is now", state.inventory);
+    console.log("Inventory is now", inventoryToString(state.inventory));
     return (true);
   }
 
   const index = findEmptySlot(state.inventory); // Will be < 0 if inv is full
   if (index >= 0) {
-    // state.inventory.push(copyItem(item));
     state.inventory[index] = copyItem(item);
     console.log(`Appended ${item.name} to the inventory`);
-    console.log("Inventory is now", state.inventory);
+    console.log("Inventory is now", inventoryToString(state.inventory));
     return (true);
   }
 
@@ -149,20 +148,52 @@ export function inventoryAdd(state: GameState, item: Gatherable): boolean {
  * @param state The current game state to get the inventory from
  * @param item The item to add
  */
-export function inventoryRemove(state: GameState, item: Gatherable): boolean {
-  const slotIndex = findItem(state, item.name);
-  if (slotIndex > -1) {
+export function inventoryRemove(
+  state: GameState,
+  itemName: string,
+  amountToRemove: number,
+): boolean {
+  const slotIndex = findItem(state, itemName);
+  if (slotIndex > -1 && state.inventory[slotIndex].amount >= amountToRemove) {
     const slot = state.inventory[slotIndex];
-    state.inventory[slotIndex].amount -= item.amount;
+    state.inventory[slotIndex].amount -= amountToRemove;
 
     if (slot.amount <= 0) {
       state.inventory[slotIndex] = EMPTY_ITEM;
     }
 
+    shiftInventoryStack(state);
     return (true);
   } else {
     return (false);
   }
+}
+
+function shiftInventoryStack(state: GameState) {
+  console.log("Shifting inventory");
+  const inventory = state.inventory;
+  console.log("Inventory is ", inventoryToString(inventory));
+
+  let firstEmpty = -1;
+
+  for (let i = 0; i < inventory.length; i++) {
+    const item = inventory[i];
+    if (item.name == EMPTY_ITEM.name && firstEmpty == -1) {
+      firstEmpty = i;
+      console.log(`Found empty at ${i}`);
+    } else if (
+      firstEmpty != -1 && item.name != EMPTY_ITEM.name && firstEmpty < i
+    ) {
+      console.log(`Moving ${item.name} at ${i} down to ${firstEmpty}`);
+      inventory[firstEmpty] = item;
+      inventory[i] = EMPTY_ITEM;
+      firstEmpty = i;
+      continue;
+    }
+  }
+
+  console.log("Inventory is now", inventoryToString(inventory));
+  state.inventory = inventory;
 }
 
 /**
@@ -220,4 +251,18 @@ function copyItem(original: Gatherable): Gatherable {
     amount: original.amount,
     icon: original.icon,
   });
+}
+
+function inventoryToString(inventory: Gatherable[]): string {
+  let str = "";
+
+  str += `\nlength: ${inventory.length}\n[\n`;
+  for (let i = 0; i < inventory.length; i++) {
+    const item = inventory[i];
+    str +=
+      `${i}: name: ${item.name}, amount: ${item.amount}, icon: ${item.icon}\n`;
+  }
+  str += `\n]`;
+
+  return str;
 }
