@@ -7,6 +7,13 @@ export type Gatherable = {
   icon: `./assets/${string}`;
 };
 
+/** The item placeholder for empty inventory slots */
+export const EMPTY_ITEM: Gatherable = {
+  name: "Empty",
+  icon: "./assets/blank.png",
+  amount: -1,
+};
+
 export const rat: Gatherable = {
   name: "rat",
   amount: 1,

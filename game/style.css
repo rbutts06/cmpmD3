@@ -84,12 +84,16 @@ body {
 
 .HUD {
   display: grid;
-  grid-template-columns: repeat(4, 25%);
+  grid-template-columns: repeat(4, auto);
   grid-template-rows: repeat(2, 50%);
   justify-items: center;
 
-  width: 35vw;
-  height: 40vh;
+  --size: 35vw;
+  --height: --size/10;
+  width: var(--size);
+  height: 20vw;
+  min-width: 500px;
+  min-height: 250px;
   padding: 1%;
   padding-top: 1%;
 
@@ -102,9 +106,11 @@ body {
 }
 
 .inventorySlot {
-  --size: 10em;
-  width: var(--size);
-  height: var(--size);
+  box-sizing: border-box;
+  width: 75%;
+  height: 90%;
+  min-width: 100px;
+  min-height: 100px;
 
   justify-items: center;
 
@@ -136,6 +142,6 @@ body {
   justify-content: center;
   margin-top: 0%;
 
-  font-size: large;
+  font-size: 150%;
   color: white;
 }

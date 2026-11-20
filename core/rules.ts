@@ -4,7 +4,7 @@
 
 //import { objectPos } from "./mod.ts";
 import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
-import { Gatherable, hasGatherable, itemAt } from "./mod.ts";
+import { EMPTY_ITEM, Gatherable, hasGatherable, itemAt } from "./mod.ts";
 import { cellCenter } from "./objects.ts";
 
 export type Cell = { x: number; y: number };
@@ -36,12 +36,14 @@ const STEPS: Record<Direction, Cell> = {
   west: { x: -1, y: 0 },
 };
 
+export const INVENTORY_SIZE = 8;
+
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
   return {
     seed,
     player: { x: 0, y: 0 },
-    inventory: new Array<Gatherable>(),
+    inventory: initializeInventory(INVENTORY_SIZE),
     gatheredCells: [],
   };
 }
@@ -101,14 +103,15 @@ function gatherPossibleItem(
   }
 }
 
-export const INVENTORY_SIZE = 8;
+function initializeInventory(size: number) {
+  const inv: Gatherable[] = [];
 
-/** The item placeholder for empty inventory slots */
-export const EMPTY_ITEM: Gatherable = {
-  name: "Empty",
-  icon: "./assets/blank.png",
-  amount: -1,
-};
+  for (let i = 0; i < size; i++) {
+    inv.push(EMPTY_ITEM);
+  }
+
+  return inv;
+}
 
 /**
  * Adds an item to the inventory. Will place item in either the first empty slot or slot with a matching name.
@@ -122,16 +125,20 @@ export function inventoryAdd(state: GameState, item: Gatherable): boolean {
   const slotIndex = findItem(state, item.name);
   if (slotIndex > -1) {
     state.inventory[slotIndex].amount += item.amount;
-    console.log("Inventory is now", state.inventory);
+    console.log(`Stacked ${item.name} at ${slotIndex}`);
+    console.log("Inventory is now", inventoryToString(state.inventory));
     return (true);
   }
 
-  if (inventoryFull(state.inventory) == false) {
-    state.inventory.push(copyItem(item));
-    console.log("Inventory is now", state.inventory);
+  const index = findEmptySlot(state.inventory); // Will be < 0 if inv is full
+  if (index >= 0) {
+    state.inventory[index] = copyItem(item);
+    console.log(`Appended ${item.name} to the inventory`);
+    console.log("Inventory is now", inventoryToString(state.inventory));
     return (true);
   }
 
+  console.log(`Couldn't add ${item.name} to inventory`);
   return (false);
 }
 
@@ -141,20 +148,52 @@ export function inventoryAdd(state: GameState, item: Gatherable): boolean {
  * @param state The current game state to get the inventory from
  * @param item The item to add
  */
-export function inventoryRemove(state: GameState, item: Gatherable): boolean {
-  const slotIndex = findItem(state, item.name);
-  if (slotIndex > -1) {
+export function inventoryRemove(
+  state: GameState,
+  itemName: string,
+  amountToRemove: number,
+): boolean {
+  const slotIndex = findItem(state, itemName);
+  if (slotIndex > -1 && state.inventory[slotIndex].amount >= amountToRemove) {
     const slot = state.inventory[slotIndex];
-    state.inventory[slotIndex].amount -= item.amount;
+    state.inventory[slotIndex].amount -= amountToRemove;
 
     if (slot.amount <= 0) {
       state.inventory[slotIndex] = EMPTY_ITEM;
     }
 
+    shiftInventoryStack(state);
     return (true);
   } else {
     return (false);
   }
+}
+
+function shiftInventoryStack(state: GameState) {
+  console.log("Shifting inventory");
+  const inventory = state.inventory;
+  console.log("Inventory is ", inventoryToString(inventory));
+
+  let firstEmpty = -1;
+
+  for (let i = 0; i < inventory.length; i++) {
+    const item = inventory[i];
+    if (item.name == EMPTY_ITEM.name && firstEmpty == -1) {
+      firstEmpty = i;
+      console.log(`Found empty at ${i}`);
+    } else if (
+      firstEmpty != -1 && item.name != EMPTY_ITEM.name && firstEmpty < i
+    ) {
+      console.log(`Moving ${item.name} at ${i} down to ${firstEmpty}`);
+      inventory[firstEmpty] = item;
+      inventory[i] = EMPTY_ITEM;
+      firstEmpty = i;
+      continue;
+    }
+  }
+
+  console.log("Inventory is now", inventoryToString(inventory));
+  state.inventory = inventory;
 }
 
 /**
@@ -173,13 +212,37 @@ export function findItem(state: GameState, itemName: string): number {
   return (-1);
 }
 
+export function findEmptySlot(inventory: Gatherable[]): number {
+  if (inventoryFull(inventory)) {
+    return (-1);
+  }
+
+  for (let i = 0; i < inventory.length; i++) {
+    if (inventory[i].name == EMPTY_ITEM.name) {
+      return i;
+    }
+  }
+
+  console.error(
+    `FindEmptySlot() error: Inventory was not full, but could not find an empty index`,
+    inventory,
+  );
+  throw new RangeError();
+}
+
 /**
  * Detect if the inventory is full.
  * @param inventory The inventory attribute of the gamestate
  * @returns True if the length is greater than or equal to the max inv size, otherwise false
  */
 function inventoryFull(inventory: Gatherable[]): boolean {
-  return (inventory.length >= INVENTORY_SIZE);
+  for (const item of inventory) {
+    if (item.name == EMPTY_ITEM.name) {
+      return (false);
+    }
+  }
+
+  return (true);
 }
 
 function copyItem(original: Gatherable): Gatherable {
@@ -188,4 +251,18 @@ function copyItem(original: Gatherable): Gatherable {
     amount: original.amount,
     icon: original.icon,
   });
+}
+
+function inventoryToString(inventory: Gatherable[]): string {
+  let str = "";
+
+  str += `\nlength: ${inventory.length}\n[\n`;
+  for (let i = 0; i < inventory.length; i++) {
+    const item = inventory[i];
+    str +=
+      `${i}: name: ${item.name}, amount: ${item.amount}, icon: ${item.icon}\n`;
+  }
+  str += `\n]`;
+
+  return str;
 }
