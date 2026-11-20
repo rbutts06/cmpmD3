@@ -3,21 +3,27 @@
 Target: The player is a farmer who harvests rats and other resources out of the ground and uses them for cooking and potions. The game ends when the player has collected all the craftable items.
 
 ## How to Play:
+
 Use the arrow keys or WASD to walk around the map and collect different resources. To craft, press the button for the recipe you wish to craft. If you're not sure what each recipe needs, hover your mouse over the button.
 
 To add more recipes the only file that needs to be edited is craftingRecipes.json. Simply add the name, image file, and how many of each ingredient it needs. The rest is handled in hud.ts.
 
-## To run locally: 
+## To run locally:
+
 Install Deno and Git, clone this repository, and open a terminal in its root folder.
 
 Run setup once per clone:
+
 ```bash
 deno task setup
 ```
+
 Start a local server:
+
 ```bash
 deno task dev
 ```
+
 Open the URL printed by the server. Add ?seed=121 for the world used by the manual test script.
 
 ## Two folders, two rules
