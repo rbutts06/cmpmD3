@@ -13,7 +13,7 @@ import {
   ratPotionItem,
   ratvioliItem,
 } from "../core/objects.ts";
-import { EMPTY_ITEM, inventoryAdd } from "../core/rules.ts";
+import { EMPTY_ITEM, inventoryAdd } from "../core/mod.ts";
 import recipeInfo from "./craftingRecipes.json" with { type: "json" };
 import "../assets/ratBurger.png";
 import "../assets/ratvioli.png";

@@ -125,16 +125,21 @@ export function inventoryAdd(state: GameState, item: Gatherable): boolean {
   const slotIndex = findItem(state, item.name);
   if (slotIndex > -1) {
     state.inventory[slotIndex].amount += item.amount;
+    console.log(`Stacked ${item.name} at ${slotIndex}`);
     console.log("Inventory is now", state.inventory);
     return (true);
   }
 
-  if (inventoryFull(state.inventory) == false) {
-    state.inventory.push(copyItem(item));
+  const index = findEmptySlot(state.inventory); // Will be < 0 if inv is full
+  if (index >= 0) {
+    // state.inventory.push(copyItem(item));
+    state.inventory[index] = copyItem(item);
+    console.log(`Appended ${item.name} to the inventory`);
     console.log("Inventory is now", state.inventory);
     return (true);
   }
 
+  console.log(`Couldn't add ${item.name} to inventory`);
   return (false);
 }
 
@@ -176,13 +181,37 @@ export function findItem(state: GameState, itemName: string): number {
   return (-1);
 }
 
+export function findEmptySlot(inventory: Gatherable[]): number {
+  if (inventoryFull(inventory)) {
+    return (-1);
+  }
+
+  for (let i = 0; i < inventory.length; i++) {
+    if (inventory[i].name == EMPTY_ITEM.name) {
+      return i;
+    }
+  }
+
+  console.error(
+    `FindEmptySlot() error: Inventory was not full, but could not find an empty index`,
+    inventory,
+  );
+  throw new RangeError();
+}
+
 /**
  * Detect if the inventory is full.
  * @param inventory The inventory attribute of the gamestate
  * @returns True if the length is greater than or equal to the max inv size, otherwise false
  */
 function inventoryFull(inventory: Gatherable[]): boolean {
-  return (inventory.length >= INVENTORY_SIZE);
+  for (const item of inventory) {
+    if (item.name == EMPTY_ITEM.name) {
+      return (false);
+    }
+  }
+
+  return (true);
 }
 
 function copyItem(original: Gatherable): Gatherable {
