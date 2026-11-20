@@ -33,7 +33,7 @@ function describe(event: GameEvent): string {
     case "blocked":
       return `blocked by ${event.terrain} at ${event.toward.x}, ${event.toward.y}`;
     case "gathered":
-      return `picked up ${event.item}`; //eventually change to "picked up {item}"
+      return `picked up ${event.item.name}`;
   }
 }
 
@@ -58,7 +58,11 @@ export class Hud {
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = terrainAt(this.seed, x, y);
-    element("win").textContent = `${recipesCrafted}/4`;
+    if (recipesCrafted == 4) {
+      element("win").textContent = "You win!";
+    } else {
+      element("win").textContent = `${recipesCrafted}/4`;
+    }
   }
 
   private createInventory(inventory: Gatherable[]) {

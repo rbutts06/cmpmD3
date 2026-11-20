@@ -180,7 +180,6 @@ export class GridView extends Phaser.Scene {
   private bump(at: Cell, toward: Cell): Promise<void> {
     const start = cellCenter(at);
     const target = cellCenter(toward);
-    //this.marker.setFillStyle(BUMP_COLOR);
     return new Promise((done) => {
       this.tweens.add({
         targets: this.marker,
